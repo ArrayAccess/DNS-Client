@@ -8,6 +8,7 @@ use ArrayAccess\DnsRecord\Utils\Buffer;
 
 /**
  * PTR Data Format - RFC1035 Section 3.5
+ *
  * PTRDNAME A <domain-name> which points to some location in the domain name space.
  *
  *      +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+

@@ -7,6 +7,7 @@ use ArrayAccess\DnsRecord\Abstracts\AbstractResourceRecordType;
 
 /**
  * TXT RData Format - RFC1035 Section 3.3.14
+ *
  * TXT-DATA One or more <character-string>s.
  *
  *      +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+

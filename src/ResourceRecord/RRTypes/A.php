@@ -8,6 +8,7 @@ use function inet_ntop;
 
 /**
  * A RDATA format - RFC1035 Section 3.4.1
+ *
  * ADDRESS A 32-bit Internet address.
  *
  *      +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
