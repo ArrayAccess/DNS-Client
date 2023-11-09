@@ -72,7 +72,7 @@ class Psr6CacheAdapter implements Psr6CacheAdapterInterface
     }
 
     /**
-     * @throws InvalidArgumentException
+     * @throws \Psr\Cache\InvalidArgumentException
      */
     public function deleteItem(string $key): bool
     {
@@ -81,7 +81,7 @@ class Psr6CacheAdapter implements Psr6CacheAdapterInterface
 
     /**
      * @inheritdoc
-     * @throws InvalidArgumentException
+     * @throws \Psr\Cache\InvalidArgumentException
      */
     public function deleteItems(string ...$keys): bool
     {
@@ -90,7 +90,7 @@ class Psr6CacheAdapter implements Psr6CacheAdapterInterface
 
     /**
      * @inheritdoc
-     * @throws InvalidArgumentException
+     * @throws \Psr\Cache\InvalidArgumentException
      */
     public function getItem(string $key): CacheDataInterface
     {
@@ -113,7 +113,7 @@ class Psr6CacheAdapter implements Psr6CacheAdapterInterface
 
     /**
      * @inheritdoc
-     * @throws InvalidArgumentException
+     * @throws \Psr\Cache\InvalidArgumentException
      */
     public function getCacheItem(string $key): ?CacheItemInterface
     {
