@@ -7,7 +7,7 @@ use ArrayAccess\DnsRecord\Abstracts\AbstractResourceRecordType;
 use ArrayAccess\DnsRecord\Utils\Buffer;
 
 /**
- * HINFO RDATA format - RFC1035 Section 3.3.9
+ * MX RDATA format - RFC1035 Section 3.3.9
  *
  * PREFERENCE A 16-bit integer which specifies the preference given to
  * this RR among others at the same owner. Lower values
