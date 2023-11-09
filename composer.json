@@ -6,7 +6,8 @@
         "dns-resolver",
         "dns",
         "php-dns",
-        "nameserver"
+        "nameserver",
+        "RFC1035"
     ],
     "license": ["LGPL-3.0-or-later"],
     "require": {

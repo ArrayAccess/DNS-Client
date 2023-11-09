@@ -9,6 +9,10 @@ use ArrayAccess\DnsRecord\Abstracts\AbstractDnsServer;
  * @link https://developers.cloudflare.com/1.1.1.1/ip-addresses/#1111-for-families
  * For block adult content use:
  *
+ * 1.1.1.3
+ * 1.0.0.3
+ *
+ * For IPV6:
  * 2606:4700:4700::1113
  * 2606:4700:4700::1003
  */
