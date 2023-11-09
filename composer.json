@@ -1,0 +1,31 @@
+{
+    "namespace": "arrayaccess/dns-client",
+    "description": "Php DNS Client Resolver",
+    "keywords": [
+        "dns-client",
+        "dns-resolver",
+        "dns",
+        "php-dns",
+        "nameserver"
+    ],
+    "license": ["LGPL-3.0-or-later"],
+    "require": {
+        "php": ">=8.1"
+    },
+    "require-dev": {
+        "psr/cache": "^3",
+        "squizlabs/php_codesniffer": "3.7.2",
+        "slevomat/coding-standard": "^8.14"
+    },
+    "config": {
+        "optimize-autoloader": true,
+        "allow-plugins": {
+            "dealerdirect/phpcodesniffer-composer-installer": true
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "ArrayAccess\\DnsRecord\\": "src/"
+        }
+    }
+}
