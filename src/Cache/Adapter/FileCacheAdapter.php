@@ -52,6 +52,12 @@ use const FILTER_VALIDATE_BOOL;
 use const PHP_INT_MAX;
 use const PHP_SAPI;
 
+/**
+ * File cache adapter.
+ * Some logic follows the file adapter from symfony/cache
+ *
+ * @link https://symfony.com/doc/current/components/cache.html
+ */
 class FileCacheAdapter implements CacheAdapterInterface
 {
     private string $namespace;

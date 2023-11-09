@@ -10,6 +10,11 @@ use ArrayAccess\DnsRecord\Interfaces\Cache\Psr6CacheAdapterInterface;
 use Psr\Cache\CacheItemInterface;
 use Psr\Cache\CacheItemPoolInterface;
 
+/**
+ * PSR6 - Cache Interface adapter
+ *
+ * @link https://www.php-fig.org/psr/psr-6/
+ */
 class Psr6CacheAdapter implements Psr6CacheAdapterInterface
 {
     private ?CacheItemPoolInterface $cacheItemPool;
