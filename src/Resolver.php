@@ -258,7 +258,7 @@ class Resolver
      * @param int|float $timeout
      * @param bool $cache
      * @param string ...$server
-     * @return ?PacketResponseInterface
+     * @return PacketResponseInterface
      */
     public function lookup(
         string $name,
@@ -267,7 +267,7 @@ class Resolver
         int|float $timeout = PacketRequestInterface::DEFAULT_TIMEOUT,
         bool $cache = true,
         string ...$server
-    ): ?PacketResponseInterface {
+    ): PacketResponseInterface {
         $request = $this->query($name, $type, $class, ...$server);
         if ($cache && ($response = $this->getCachePacket($request))) {
             return $response;
