@@ -6,7 +6,8 @@ Support [PSR-6: Caching Interface](https://www.php-fig.org/psr/psr-6/).
 
 ## Requirements
 
-- Php 8.1 or later
+- `Php 8.1` or later
+- Function `focksopen` enabled & allowed outbond connection to port `53`
 - Network Connectivity (_Absolutely!_)
 
 ## Note
