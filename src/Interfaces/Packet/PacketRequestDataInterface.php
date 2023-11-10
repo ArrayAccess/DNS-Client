@@ -20,7 +20,7 @@ interface PacketRequestDataInterface extends Serializable
      * @param PacketHeaderInterface $header
      * @return $this
      */
-    public function withHeader(PacketHeaderInterface $header) : static;
+    public function withHeader(PacketHeaderInterface $header) : PacketRequestDataInterface;
 
     /**
      * Get packet questions from given constructor argument
