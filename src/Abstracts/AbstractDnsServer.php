@@ -35,6 +35,11 @@ abstract class AbstractDnsServer implements DnsServerInterface
      */
     protected ?string $secondaryServer = null;
 
+    /**
+     * Dns Port, default 53
+     *
+     * @var int
+     */
     protected int $port = 53;
 
     /**
