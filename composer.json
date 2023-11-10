@@ -29,5 +29,11 @@
         "psr-4": {
             "ArrayAccess\\DnsRecord\\": "src/"
         }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "ArrayAccess\\DnsRecord\\": "src/",
+            "Tests\\ArrayAccess\\DnsRecord\\": "tests/"
+        }
     }
 }

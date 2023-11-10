@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace ArrayAccess\DnsRecord\Tests\Cache;
+namespace Tests\ArrayAccess\DnsRecord\Cache;
 
 use ArrayAccess\DnsRecord\Cache\Adapter\ArrayCacheAdapter;
 use ArrayAccess\DnsRecord\Cache\CacheStorage;

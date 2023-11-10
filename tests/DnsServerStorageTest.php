@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace ArrayAccess\DnsRecord\Tests;
+namespace Tests\ArrayAccess\DnsRecord;
 
 use ArrayAccess\DnsRecord\DnsServer\CustomDnsServer;
 use ArrayAccess\DnsRecord\DnsServer\Google;
