@@ -34,7 +34,7 @@ class Records implements PacketResourceRecordsInterface
         return md5(
             $record->getRData()
             . $record->getHeader()
-            . $record->getType()
+            . $record->getType()->getName()
             . $record->getName()
         );
     }
@@ -75,7 +75,7 @@ class Records implements PacketResourceRecordsInterface
         $type = strtoupper(trim($type));
         $result = [];
         foreach ($this->getRecords() as $record) {
-            if ($record->getType() === $type) {
+            if ($record->getType()->getName() === $type) {
                 if ($single) {
                     return $record;
                 }
