@@ -108,6 +108,11 @@ class CacheStorage implements CacheStorageInterface
      */
     public function getCacheName(PacketRequestDataInterface|string $key): string
     {
+        if (is_object($key)) {
+            // id is increment / random
+            // cache use id
+            $key = $key->withHeader($key->getHeader()->withId(1));
+        }
         return is_object($key)
             ? sprintf('%s%s', self::PREFIX, md5($key->getQueryMessage()))
             : $key;
