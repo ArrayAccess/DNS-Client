@@ -1,0 +1,4 @@
+# Ignore github attributes
+/.github        export-ignore
+# Ignore self
+/.gitattributes export-ignore
