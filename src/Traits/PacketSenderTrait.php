@@ -14,11 +14,11 @@ use ArrayAccess\DnsRecord\Packet\Answers;
 use ArrayAccess\DnsRecord\Packet\Header;
 use ArrayAccess\DnsRecord\Packet\Message;
 use ArrayAccess\DnsRecord\Packet\Response;
+use ArrayAccess\DnsRecord\Utils\Caller;
 use ArrayAccess\DnsRecord\Utils\Lookup;
 use Throwable;
 use function fclose;
 use function fread;
-use function fsockopen;
 use function fwrite;
 use function is_resource;
 use function max;
@@ -84,30 +84,26 @@ trait PacketSenderTrait
             }
             unset($this->sockets["$protocol://$server:$port"]);
         }
-        set_error_handler(static function ($errCode, $errMsg) use (&$eCode, &$eMessage) {
-            $eCode = $errCode;
-            $eMessage = $errMsg;
-        });
-        try {
-            $handle = fsockopen(
-                "$protocol://$server",
-                $port,
-                $errorCode,
-                $errorMessage,
-                $timeout
-            );
-            if (is_resource($handle)) {
-                return $this->sockets["$protocol://$server:$port"] = $handle;
-            }
-            $errorCode = $errorCode?:($eCode??$errorCode);
-            $errorMessage = $errorMessage?:($eMessage??$errorMessage)?:'Unknown Error';
-            throw new RequestException(
-                $errorMessage,
-                $errorCode??0
-            );
-        } finally {
-            restore_error_handler();
+        $hostname = "$protocol://$server";
+        $handle = Caller::track(
+            'fsockopen',
+            $eCode,
+            $eMessage,
+            $hostname,
+            $port,
+            $errorCode,
+            $errorMessage,
+            $timeout
+        );
+        if (is_resource($handle)) {
+            return $this->sockets["$protocol://$server:$port"] = $handle;
         }
+        $errorCode = $errorCode?:($eCode??$errorCode);
+        $errorMessage = $errorMessage?:($eMessage??$errorMessage)?:'Unknown Error';
+        throw new RequestException(
+            $errorMessage,
+            $errorCode??0
+        );
     }
 
     /**
@@ -212,11 +208,12 @@ trait PacketSenderTrait
                 );
             }
 
-            // $readLength = $isUdp ? Lookup::MAX_UDP_SIZE : Lookup::MAX_TCP_SIZE;
+            // read data - on some dns response more than 512 octets
+            // so, we use 4000 bytes read / TCP Size
+            $readLength = Lookup::MAX_TCP_SIZE;
             // first set to 1 second
             $this->setResourceTimeout($resource, 1);
-            // read data - on some dns response more than 512 octets
-            $data = fread($resource, Lookup::MAX_TCP_SIZE);
+            $data = fread($resource, $readLength);
             $info = stream_get_meta_data($resource);
             // on some cases the dns server read process timed out
             if ($data === false && !empty($info['timed_out'])) {
@@ -224,7 +221,7 @@ trait PacketSenderTrait
                 usleep(0x186a0); // 100ms
                 // set request with given timeout
                 $this->setResourceTimeout($resource, $timeout);
-                $data = fread($resource, Lookup::MAX_TCP_SIZE);
+                $data = fread($resource, $readLength);
                 $info = stream_get_meta_data($resource);
             }
 
