@@ -138,12 +138,13 @@ class Addresses
         // get domain name if the given argument is an url
         // protocol://user:pass@domainname.com:port/path
         if (preg_match(
-            '~^(?:(?:[a-z]+:)?//)?(?:[^:]*(?::[^@]*)?@)?([^/]+)(?::\d+|[#?/]|$)~',
+            '~^(?:(?:[a-z]+:)?//)?(?:[^:]*(?::[^@]*)?@)?([^/:]+)(?::\d+|[#?/]|$)~',
             $domainName,
             $match
         )) {
             $domainName = $match[1];
         }
+
         if ($domainName === 'localhost') {
             return $domainName;
         }
@@ -187,30 +188,35 @@ class Addresses
         if ($intl_idn) {
             $domainName = $isAscii ? idn_to_utf8($domainName) : idn_to_ascii($domainName);
             // revert
-            return ($isAscii ? idn_to_ascii($domainName) : idn_to_utf8($domainName)) ?: null;
-        }
-
-        foreach ($labels as &$label) {
-            if (preg_match('/[^x00-x7F]/', $domainName)) {
-                $label = 'xn--'.self::punycodeEncode($label);
-                if (!$label || strlen($label) > 63) {
-                    return null;
+            $domainName = ($isAscii ? idn_to_ascii($domainName) : idn_to_utf8($domainName)) ?: null;
+            if (!$domainName) {
+                return null;
+            }
+            $labels = $domainName;
+        } else {
+            foreach ($labels as &$label) {
+                if (preg_match('/[^x00-x7F]/', $domainName)) {
+                    $label = 'xn--' . self::punycodeEncode($label);
+                    if (!$label || strlen($label) > 63) {
+                        return null;
+                    }
                 }
             }
+            unset($label);
+            $labels = implode('.', $labels);
         }
-
-        unset($label);
-        $labels = implode('.', $labels);
         if (strlen($labels) > 255
             || strlen($labels) < 2
+            // domain except localhost should contain extension
             // xn-- // (?i)[a-z0-9-]
             || !preg_match(
-                '~[a-z0-9\-](?:[a-z0-9-]*[a-z0-9]+(?:\.[a-z0-9-]*[a-z0-9]+)*)?$~',
+                '~[a-z0-9\-](?:[a-z0-9-]*[a-z0-9]+(?:\.[a-z0-9-]*[a-z0-9]+)*)?\.(?:xn--[a-z0-9_]+|[a-z]+)$~',
                 $labels
             )
         ) {
             return null;
         }
+
 
         return $domainName;
     }
