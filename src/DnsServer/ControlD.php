@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace ArrayAccess\DnsRecord\DnsServer;
 
 use ArrayAccess\DnsRecord\Abstracts\AbstractDnsServer;
+use ArrayAccess\DnsRecord\Traits\DisableSetterTrait;
 
 /**
  * For more controlD dns service use
@@ -12,7 +13,7 @@ use ArrayAccess\DnsRecord\Abstracts\AbstractDnsServer;
  */
 class ControlD extends AbstractDnsServer
 {
-    protected string $identity = 'ControlD';
+    use DisableSetterTrait;
 
     protected string $primaryServer = '76.76.2.0';
 

@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace ArrayAccess\DnsRecord\DnsServer;
 
 use ArrayAccess\DnsRecord\Abstracts\AbstractDnsServer;
+use ArrayAccess\DnsRecord\Traits\DisableSetterTrait;
 use function sprintf;
 
 /**
@@ -11,6 +12,8 @@ use function sprintf;
  */
 class CustomDnsServer extends AbstractDnsServer
 {
+    use DisableSetterTrait;
+
     /**
      * @param string $primaryServer
      * @param ?string $secondaryServer
@@ -27,7 +30,8 @@ class CustomDnsServer extends AbstractDnsServer
         $this->secondaryServer = $secondaryServer;
         if (!$identity) {
             $this->identity = sprintf(
-                'custom_dns_server/%s/%s',
+                '%s/%s/%s',
+                $this::class,
                 $primaryServer,
                 $secondaryServer
             );

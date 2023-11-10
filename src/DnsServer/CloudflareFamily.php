@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace ArrayAccess\DnsRecord\DnsServer;
 
 use ArrayAccess\DnsRecord\Abstracts\AbstractDnsServer;
+use ArrayAccess\DnsRecord\Traits\DisableSetterTrait;
 
 /**
  * @link https://developers.cloudflare.com/1.1.1.1/ip-addresses/#1111-for-families
@@ -18,7 +19,7 @@ use ArrayAccess\DnsRecord\Abstracts\AbstractDnsServer;
  */
 class CloudflareFamily extends AbstractDnsServer
 {
-    protected string $identity = 'CloudflareFamily';
+    use DisableSetterTrait;
 
     protected string $primaryServer = '1.1.1.2';
 
