@@ -8,6 +8,7 @@ use ArrayAccess\DnsRecord\Interfaces\Cache\CacheStorageInterface;
 interface PacketRequestInterface
 {
     const DEFAULT_TIMEOUT = 5;
+
     const MAX_TIMEOUT = 60;
 
     /**
