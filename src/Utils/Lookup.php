@@ -110,6 +110,11 @@ class Lookup
             $opcode = $opcode->getValue();
         }
         if (is_string($opcode)) {
+            if ($opcode === '') {
+                throw new EmptyArgumentException(
+                    'OPCODE could not be empty string or whitespace only'
+                );
+            }
             $opcode = strtoupper(trim($opcode));
             $code = self::OPCODE_LIST[$opcode]??null;
             if (!$opcode) {
