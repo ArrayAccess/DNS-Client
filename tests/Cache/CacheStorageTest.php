@@ -142,7 +142,7 @@ class CacheStorageTest extends TestCase
         $stringKey = 'cache';
         $this->assertSame(
             $stringKey,
-            $stringKey,
+            $this->cacheStorage->getCacheName($stringKey),
             sprintf(
                 '%1$s->getCacheName("%2$s") should identical with %2$s',
                 $this->cacheStorageClassName,
@@ -153,6 +153,9 @@ class CacheStorageTest extends TestCase
 
     public function testGetAdapter()
     {
+        /**
+         * @see self::testSetAdapter()
+         */
         $this->assertNull(
             $this->cacheStorage->getAdapter(),
             sprintf(
