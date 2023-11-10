@@ -220,7 +220,10 @@ class Header implements PacketHeaderInterface
         $flags = ord($message[++$offset]);
         // getting 4-bit op code
         $this->opcode   = Lookup::resourceOpcode($flags >> 3 & 15);
-        // getting 1 bit at position 7
+        /**
+         * getting 1-bit at position 7
+         * On response @uses Lookup::QR_RESPONSE
+         */
         $this->qr       = $flags >> 7 & 1;
         $this->aa       = $flags >> 2 & 1;
         $this->tc       = $flags >> 1 & 1;
