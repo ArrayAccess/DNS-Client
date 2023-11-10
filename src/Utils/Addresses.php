@@ -1,8 +1,10 @@
 <?php
+/** @noinspection PhpComposerExtensionStubsInspection */
 declare(strict_types=1);
 
 namespace ArrayAccess\DnsRecord\Utils;
 
+use Stringable;
 use function array_reverse;
 use function chr;
 use function explode;
@@ -17,6 +19,7 @@ use function ip2long;
 use function is_string;
 use function long2ip;
 use function ord;
+use function parse_url;
 use function preg_match;
 use function str_contains;
 use function str_starts_with;
@@ -26,6 +29,17 @@ use function trim;
 
 class Addresses
 {
+    /**
+     * Guess the given dns server, first use IP and then Domain name
+     *
+     * @param mixed $server
+     * @return string|null
+     */
+    public static function guessDNSServer(mixed $server): ?string
+    {
+        // ip
+        return self::filterIp($server)??self::filterDomain($server);
+    }
 
     /**
      * Filter IPv6
@@ -98,13 +112,21 @@ class Addresses
     /**
      * Filter domain name as possible
      *
-     * @param string $domainName the domain name
+     * @param mixed $domainName the domain name
      * @return ?string null if invalid
      *
      * @noinspection PhpComposerExtensionStubsInspection
      */
-    public static function filterDomain(string $domainName): ?string
+    public static function filterDomain(mixed $domainName): ?string
     {
+        // convert to string if maybe the domain name is PSR UriInterface
+        if ($domainName instanceof Stringable) {
+            $domainName = (string) $domainName;
+        }
+
+        if (!is_string($domainName)) {
+            return null;
+        }
         static $intl_idn = null;
         $intl_idn ??= function_exists('idn_to_ascii')
             && function_exists('idn_to_utf8');
@@ -112,6 +134,15 @@ class Addresses
         $domainName = strtolower(trim($domainName));
         if (!$domainName) {
             return null;
+        }
+        // get domain name if the given argument is an url
+        // protocol://user:pass@domainname.com:port/path
+        if (preg_match(
+            '~^(?:(?:[a-z]+:)?//)?(?:[^:]*(?::[^@]*)?@)?([^/]+)(?::\d+|[#?/]|$)~',
+            $domainName,
+            $match
+        )) {
+            $domainName = $match[1];
         }
         if ($domainName === 'localhost') {
             return $domainName;
@@ -122,6 +153,20 @@ class Addresses
             return null;
         }
 
+        // check common part of uri
+        if (preg_match('~[:/#?@]~', $domainName)) {
+            $parsed = parse_url($domainName);
+            // using false positive eg: aaa:example.com
+            if (!isset($parsed['host'])
+                && isset($parsed['scheme'], $parsed['path'])
+                && !str_contains($parsed['path'], '/')
+            ) {
+                $domainName = $parsed['path'];
+            }
+            if (!$domainName) {
+                return null;
+            }
+        }
         $isAscii = false;
         $labels = [];
         foreach (explode('.', $domainName) as $label) {

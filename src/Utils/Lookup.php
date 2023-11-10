@@ -29,13 +29,10 @@ use ArrayAccess\DnsRecord\ResourceRecord\Definitions\QClass\ReservedEnd;
 use ArrayAccess\DnsRecord\ResourceRecord\Definitions\QClass\ReservedStart;
 use ArrayAccess\DnsRecord\ResourceRecord\Definitions\QClass\Unassigned;
 use ArrayAccess\DnsRecord\ResourceRecord\Definitions\QType;
-use function fsockopen;
 use function is_int;
 use function is_object;
 use function is_resource;
 use function is_string;
-use function restore_error_handler;
-use function set_error_handler;
 use function sprintf;
 use function str_contains;
 use function strtoupper;
@@ -447,8 +444,8 @@ class Lookup
             $dnsServerStorage = [$dnsServerStorage];
         }
         foreach ($dnsServerStorage as $server) {
-            $primary   = Addresses::filterIp($server->getPrimaryServer());
-            $secondary = Addresses::filterIp($server->getSecondaryServer());
+            $primary   = Addresses::guessDNSServer($server->getPrimaryServer());
+            $secondary = Addresses::guessDNSServer($server->getSecondaryServer());
             if ($primary) {
                 $serverList[$primary] = null;
                 $ports[$primary] = $server->getPort();
@@ -467,43 +464,37 @@ class Lookup
             ++$testCount;
             $port = $ports[$server];
             $hostname = "$protocol://$server";
-            set_error_handler(static function ($errCode, $errMsg) use (&$eCode, &$eMessage) {
-                $eCode = $errCode;
-                $eMessage = $errMsg;
-            });
-            try {
-                $handle = fsockopen(
-                    $hostname,
-                    $port,
-                    $errorCode,
-                    $errorMessage,
-                    $timeout
-                );
-                $errorCode = $errorCode?:($eCode??$errorCode);
-                $errorMessage = $errorMessage?:($eMessage??$errorMessage)?:'Unknown Error';
-                unset($eCode, $eMessage);
-
-                if (is_resource($handle)) {
-                    return [
-                        'protocol' => $protocol,
-                        'server' => $server,
-                        'port' => $port,
-                        'socket' => $handle
-                    ];
-                }
-                $serverList[$server] = [
-                    'code' => $errorCode,
-                    'message' => $errorMessage,
-                    'count' => $testCount,
+            $handle = Caller::track(
+                'fsockopen',
+                $eCode,
+                $eMessage,
+                $hostname,
+                $port,
+                $errorCode,
+                $errorMessage,
+                $timeout
+            );
+            if (is_resource($handle)) {
+                return [
+                    'protocol' => $protocol,
                     'server' => $server,
                     'port' => $port,
+                    'socket' => $handle
                 ];
-                // if network down
-                if (str_contains($errorMessage, 'Network is unreachable')) {
-                    break;
-                }
-            } finally {
-                restore_error_handler();
+            }
+            $errorCode = $errorCode?:($eCode??$errorCode);
+            $errorMessage = $errorMessage?:($eMessage??$errorMessage)?:'Unknown Error';
+            unset($eCode, $eMessage);
+            $serverList[$server] = [
+                'code' => $errorCode,
+                'message' => $errorMessage,
+                'count' => $testCount,
+                'server' => $server,
+                'port' => $port,
+            ];
+            // if network down
+            if (str_contains($errorMessage, 'Network is unreachable')) {
+                break;
             }
         }
 
