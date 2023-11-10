@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit
+        bootstrap="vendor/autoload.php"
+        backupGlobals="false"
+        backupStaticProperties="false"
+        colors="true"
+        processIsolation="false"
+        cacheResult="false"
+        stopOnFailure="true"
+        stopOnError="true"
+        stopOnWarning="true"
+        displayDetailsOnIncompleteTests="true"
+>
+    <testsuites>
+        <testsuite name="DNS Client Test Suite">
+            <directory
+                    prefix=""
+                    suffix="Test.php"
+                    phpVersion="8.1"
+                    phpVersionOperator="&gt;="
+            >tests
+            </directory>
+        </testsuite>
+    </testsuites>
+    <php>
+        <env name="APP_ENV" value="testing"/>
+        <env name="DEFAULT_TIMEOUT" value="3.5"/>
+    </php>
+</phpunit>

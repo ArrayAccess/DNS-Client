@@ -25,6 +25,7 @@
 
     <!-- Path To Check -->
     <file>src/</file>
+    <file>tests/</file>
     <!-- Slevomat Ruleset -->
     <config name="installed_paths" value="vendor/slevomat/coding-standard/SlevomatCodingStandard"/>
     <!-- detect spacing -->
