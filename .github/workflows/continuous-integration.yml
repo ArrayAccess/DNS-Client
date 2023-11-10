@@ -23,6 +23,8 @@ jobs:
         run: php $(which composer) install --no-interaction --no-progress --no-suggest
       - name: "Run PHP CodeSniffer"
         run: php vendor/bin/phpcs --standard=phpcs.xml
+      - name: "Run PHP Unit Test"
+        run: php vendor/bin/phpunit --configuration=phpunit.xml
   coding-standards-php82:
     name: "Coding Standards php8.2"
     runs-on: ubuntu-latest
@@ -41,6 +43,8 @@ jobs:
         run: php $(which composer) install --no-interaction --no-progress --no-suggest
       - name: "Run PHP CodeSniffer"
         run: php vendor/bin/phpcs --standard=phpcs.xml
+      - name: "Run PHP Unit Test"
+        run: php vendor/bin/phpunit --configuration=phpunit.xml
   coding-standards-php83:
     name: "Coding Standards php8.3"
     runs-on: ubuntu-latest
@@ -59,3 +63,5 @@ jobs:
         run: php $(which composer) install --no-interaction --no-progress --no-suggest
       - name: "Run PHP CodeSniffer"
         run: php vendor/bin/phpcs --standard=phpcs.xml
+      - name: "Run PHP Unit Test"
+        run: php vendor/bin/phpunit --configuration=phpunit.xml
