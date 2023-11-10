@@ -12,7 +12,6 @@ use ArrayAccess\DnsRecord\Utils\Lookup;
 use function array_search;
 use function base64_decode;
 use function base64_encode;
-use function implode;
 use function is_string;
 use function ord;
 use function serialize;
@@ -170,6 +169,7 @@ class Header implements PacketHeaderInterface
      *
      * @return string
      */
+    /*
     public function __toString(): string
     {
         $content = sprintf(
@@ -197,7 +197,7 @@ class Header implements PacketHeaderInterface
         );
 
         return $content;
-    }
+    }*/
 
     /**
      * Parse the message
