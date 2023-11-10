@@ -9,6 +9,9 @@
         stopOnFailure="true"
         stopOnError="true"
         stopOnWarning="true"
+        stopOnRisky="true"
+        failOnRisky="true"
+        failOnEmptyTestSuite="true"
         displayDetailsOnIncompleteTests="true"
 >
     <testsuites>
