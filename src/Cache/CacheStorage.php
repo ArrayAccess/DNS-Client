@@ -50,7 +50,10 @@ class CacheStorage implements CacheStorageInterface
      */
     public function saveItem(PacketResponseInterface $response, int|DateInterval|null $ttl = self::DEFAULT_TTL): bool
     {
-        $cacheItem = $this->getAdapter()->getItem($this->getCacheName($response->getPacketData()));
+        $cacheItem = $this->getAdapter()?->getItem($this->getCacheName($response->getPacketData()));
+        if ($cacheItem === null) {
+            return false;
+        }
         $cacheItem
             ->set($response)
             ->expiresAfter($ttl??self::DEFAULT_TTL);
