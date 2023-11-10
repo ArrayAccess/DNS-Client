@@ -3,11 +3,12 @@ declare(strict_types=1);
 
 namespace ArrayAccess\DnsRecord\Interfaces\DnsServer;
 
+use Countable;
 use IteratorAggregate;
 use Serializable;
 use Traversable;
 
-interface DnsServerStorageInterface extends IteratorAggregate, Serializable
+interface DnsServerStorageInterface extends IteratorAggregate, Countable, Serializable
 {
     /**
      * Dns Server Storage
