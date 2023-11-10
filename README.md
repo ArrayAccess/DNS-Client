@@ -10,6 +10,14 @@ Support [PSR-6: Caching Interface](https://www.php-fig.org/psr/psr-6/).
 - Function `focksopen` enabled & allowed outbond connection to port `53`
 - Network Connectivity (_Absolutely!_)
 
+## Installing
+
+Currently, in development:
+
+```bash
+composer require arrayaccess/dns-client:dev-main 
+```
+
 ## Note
 
 The [RRTypes](src/ResourceRecord/RRTypes) not completed yet,
