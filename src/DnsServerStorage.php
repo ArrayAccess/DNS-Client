@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace ArrayAccess\DnsRecord;
 
 use ArrayAccess\DnsRecord\DnsServer\Cloudflare;
+use ArrayAccess\DnsRecord\DnsServer\CloudflareFamily;
 use ArrayAccess\DnsRecord\DnsServer\ControlD;
 use ArrayAccess\DnsRecord\DnsServer\Google;
 use ArrayAccess\DnsRecord\DnsServer\OpenDNS;
@@ -11,8 +12,10 @@ use ArrayAccess\DnsRecord\Interfaces\DnsServer\DnsServerInterface;
 use ArrayAccess\DnsRecord\Interfaces\DnsServer\DnsServerStorageInterface;
 use ArrayIterator;
 use Traversable;
+use function count;
 use function is_string;
 use function serialize;
+use function strtolower;
 use function unserialize;
 
 /**
@@ -24,13 +27,19 @@ class DnsServerStorage implements DnsServerStorageInterface
         Google::class,
         Cloudflare::class,
         OpenDNS::class,
-        ControlD::class
+        ControlD::class,
+        CloudflareFamily::class,
     ];
 
     /**
      * @var array<string, DnsServerInterface>
      */
     protected array $servers = [];
+
+    /**
+     * @var array<class-string, DnsServerInterface>
+     */
+    private static array $cachedDefaultServers = [];
 
     /**
      * @inheritdoc
@@ -41,6 +50,29 @@ class DnsServerStorage implements DnsServerStorageInterface
     }
 
     /**
+     * @param string $className
+     * @return ?DnsServerInterface
+     */
+    public static function getDefaultServer(string $className) : ?DnsServerInterface
+    {
+        if (empty(self::$cachedDefaultServers)) {
+            // create default
+            foreach (self::DEFAULT_SERVER as $item) {
+                self::$cachedDefaultServers[strtolower($item)] = $item;
+            }
+        }
+
+        $clasName = ltrim(strtolower($className), '\\');
+        if (!isset(self::$cachedDefaultServers[$clasName])) {
+            return null;
+        }
+        if (is_string(self::$cachedDefaultServers[$clasName])) {
+            self::$cachedDefaultServers[$clasName] = new self::$cachedDefaultServers[$clasName];
+        }
+        return self::$cachedDefaultServers[$clasName];
+    }
+
+    /**
      * @inheritdoc
      */
     public static function createDefault() : static
@@ -48,10 +80,10 @@ class DnsServerStorage implements DnsServerStorageInterface
         $obj = null;
         foreach (self::DEFAULT_SERVER as $className) {
             if (!$obj) {
-                $obj = new static(new $className);
+                $obj = new static(self::getDefaultServer($className));
                 continue;
             }
-            $obj->add(new $className);
+            $obj->add(self::getDefaultServer($className));
         }
 
         return $obj;
@@ -97,6 +129,14 @@ class DnsServerStorage implements DnsServerStorageInterface
     public function getIterator() : Traversable
     {
         return new ArrayIterator($this->getServers());
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function count(): int
+    {
+        return count($this->getServers());
     }
 
     /**
