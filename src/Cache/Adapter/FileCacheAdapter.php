@@ -7,6 +7,7 @@ use ArrayAccess\DnsRecord\Cache\CacheData;
 use ArrayAccess\DnsRecord\Exceptions\CacheException;
 use ArrayAccess\DnsRecord\Interfaces\Cache\CacheAdapterInterface;
 use ArrayAccess\DnsRecord\Interfaces\Cache\CacheDataInterface;
+use ArrayAccess\DnsRecord\Utils\Caller;
 use BadMethodCallException;
 use Exception;
 use Generator;
@@ -15,7 +16,6 @@ use Throwable;
 use function array_shift;
 use function base64_encode;
 use function count;
-use function error_clear_last;
 use function fclose;
 use function file_exists;
 use function filemtime;
@@ -60,20 +60,46 @@ use const PHP_SAPI;
  */
 class FileCacheAdapter implements CacheAdapterInterface
 {
+    /**
+     * Cache namespace
+     *
+     * @var string
+     */
     private string $namespace;
 
+    /**
+     * Base cache directory
+     *
+     * @var string
+     */
     private string $directory;
 
     /**
+     * Cache collections
+     *
      * @var array<CacheDataInterface>
      */
     private array $values = [];
 
+    /**
+     * Cache files records (key as string-id)
+     * @var array<string, string>
+     */
     private array $files = [];
 
+    /**
+     * Cache temporary file prefix
+     *
+     * @var string
+     */
     private string $prefixTemp = 'tmp-';
 
-    private static array $cachesValues = [];
+    /**
+     * Global cache data store
+     *
+     * @var array<string, int>
+     */
+    private static array $cachesExpires = [];
 
     /**
      * @throws CacheException
@@ -86,11 +112,21 @@ class FileCacheAdapter implements CacheAdapterInterface
         $this->doInit($namespace, $directory);
     }
 
+    /**
+     * Get namespace cache identifier
+     *
+     * @return string
+     */
     public function getNamespace(): string
     {
         return $this->namespace;
     }
 
+    /**
+     * Get cache directory
+     *
+     * @return string
+     */
     public function getDirectory(): string
     {
         return $this->directory;
@@ -123,7 +159,7 @@ class FileCacheAdapter implements CacheAdapterInterface
             );
         }
         if (!is_dir($this->directory)) {
-            $this->doCallbackReduceError(
+            Caller::call(
                 'mkdir',
                 $this->directory,
                 0777,
@@ -135,18 +171,6 @@ class FileCacheAdapter implements CacheAdapterInterface
                 'Cache directory does not exists'
             );
         }
-    }
-
-    private function doCallbackReduceError(callable $callback, ...$arguments)
-    {
-        set_error_handler(static fn () => error_clear_last());
-        try {
-            $result = $callback(...$arguments);
-        } finally {
-            restore_error_handler();
-        }
-
-        return $result;
     }
 
     /**
@@ -180,12 +204,7 @@ class FileCacheAdapter implements CacheAdapterInterface
                 if (!is_dir($dir = $baseDir.DIRECTORY_SEPARATOR.$chars[$j])) {
                     continue;
                 }
-                foreach ($this
-                             ->doCallbackReduceError(
-                                 'scandir',
-                                 $dir,
-                                 SCANDIR_SORT_NONE
-                             ) ?: [] as $file) {
+                foreach (Caller::call('scandir', $dir, SCANDIR_SORT_NONE) ?: [] as $file) {
                     if ('.' !== $file && '..' !== $file) {
                         yield $dir => $dir.DIRECTORY_SEPARATOR.$file;
                     }
@@ -200,6 +219,11 @@ class FileCacheAdapter implements CacheAdapterInterface
         }
     }
 
+    /**
+     * Prune the expired cache
+     *
+     * @return bool
+     */
     public function prune(): bool
     {
         $time = time();
@@ -235,7 +259,7 @@ class FileCacheAdapter implements CacheAdapterInterface
                 }
 
                 $this->values[$value->getKey()] = $value;
-                self::$cachesValues[$file] = $expiresAt;
+                self::$cachesExpires[$file] = $expiresAt;
                 continue;
             }
             $this->doUnlink($file);
@@ -254,14 +278,14 @@ class FileCacheAdapter implements CacheAdapterInterface
                 array_shift($this->values);
             }
         }
-        if (count(self::$cachesValues) > $maximum) {
-            while (count(self::$cachesValues) > $max) {
-                array_shift(self::$cachesValues);
+        if (count(self::$cachesExpires) > $maximum) {
+            while (count(self::$cachesExpires) > $max) {
+                array_shift(self::$cachesExpires);
             }
         }
         if (count($this->files) > $maximum) {
             while (count($this->files) > $max) {
-                array_shift(self::$cachesValues);
+                array_shift(self::$cachesExpires);
             }
         }
     }
@@ -280,7 +304,7 @@ class FileCacheAdapter implements CacheAdapterInterface
         $file = $this->files[$key] = $this->getFile($key, true);
         $this->values[$key] = $cacheData;
 
-        self::$cachesValues[$file] = $expiry;
+        self::$cachesExpires[$file] = $expiry;
         $value   = var_export(serialize($cacheData), true);
         $hashKey = md5($key);
         $value = "return [$expiryString, '$hashKey', $value];";
@@ -288,8 +312,8 @@ class FileCacheAdapter implements CacheAdapterInterface
 
         $this->clearLocalCache();
         if ($allowCompile) {
-            $this->doCallbackReduceError('opcache_invalidate', $file, true);
-            $this->doCallbackReduceError('opcache_compile_file', $file);
+            Caller::call('opcache_invalidate', $file, true);
+            Caller::call('opcache_compile_file', $file);
         }
 
         return $ok;
@@ -340,12 +364,12 @@ class FileCacheAdapter implements CacheAdapterInterface
             fclose($h);
             $unlink = true;
             // 3 days & set to clear the cache
-            touch($tmp, time() + 259200);
+            Caller::call('touch', $tmp, time() + 259200);
             // remove first
             if (file_exists($file)) {
                 $this->doUnlink($file);
             }
-            $success = $this->doCallbackReduceError('rename', $tmp, $file);
+            $success = Caller::call('rename', $tmp, $file);
             $unlink = !$success;
         } finally {
             restore_error_handler();
@@ -369,7 +393,7 @@ class FileCacheAdapter implements CacheAdapterInterface
             . DIRECTORY_SEPARATOR
         );
         if ($mkdir && !is_dir($dir)) {
-            $this->doCallbackReduceError('mkdir', $dir, 0777, true);
+            Caller::call('mkdir', $dir, 0777, true);
         }
 
         return $dir . substr($hash, 2, 20);
@@ -382,7 +406,7 @@ class FileCacheAdapter implements CacheAdapterInterface
             unset($this->values[$id]);
             $file = ($this->files[$id]??= $this->getFile($id));
             if (is_file($file)) {
-                self::$cachesValues[$file] = 0;
+                self::$cachesExpires[$file] = 0;
                 $succeed = $this->doUnlink($file) && $succeed;
             }
         }
@@ -405,10 +429,10 @@ class FileCacheAdapter implements CacheAdapterInterface
     private function doUnlink(string $file)
     {
         if (self::isOpcacheSupport()) {
-            $this->doCallbackReduceError('opcache_invalidate', $file, true);
+            Caller::call('opcache_invalidate', $file, true);
         }
-        self::$cachesValues[$file] = 0;
-        return $this->doCallbackReduceError(fn () => is_file($file) && unlink($file));
+        self::$cachesExpires[$file] = 0;
+        return Caller::call(fn () => is_file($file) && unlink($file));
     }
 
     /**
@@ -420,7 +444,7 @@ class FileCacheAdapter implements CacheAdapterInterface
         if (!file_exists($file)) {
             return false;
         }
-        $socket = $this->doCallbackReduceError('fopen', $file, 'r');
+        $socket = Caller::call('fopen', $file, 'r');
         if (!$socket) {
             return false;
         }
@@ -445,7 +469,7 @@ class FileCacheAdapter implements CacheAdapterInterface
         }
 
         $file = ($this->files[$key]??= $this->getFile($key));
-        if (isset(self::$cachesValues[$file])
+        if (isset(self::$cachesExpires[$file])
             || !file_exists($file)
         ) {
             return null;
@@ -474,7 +498,7 @@ class FileCacheAdapter implements CacheAdapterInterface
             if ($time < $expiresAt && isset($value)) {
                 $unlink = false;
                 $this->clearLocalCache();
-                self::$cachesValues[$file] = $time - $expiresAt;
+                self::$cachesExpires[$file] = $time - $expiresAt;
                 return $this->values[$key] = new CacheData(
                     $value->getKey(),
                     $value->get()
@@ -485,7 +509,7 @@ class FileCacheAdapter implements CacheAdapterInterface
             return null;
         } finally {
             if ($unlink && file_exists($file)) {
-                self::$cachesValues[$file] = 0;
+                self::$cachesExpires[$file] = 0;
                 unset($this->values[$key]);
                 $this->doUnlink($file);
             }
@@ -552,12 +576,12 @@ class FileCacheAdapter implements CacheAdapterInterface
                 continue;
             }
             // do remove directory
-            $this->doCallbackReduceError('rmdir', $dir);
+            Caller::call('rmdir', $dir);
         }
 
         $time = time();
         // remove temporary
-        foreach ($this->doCallbackReduceError('scandir', $this->directory)?:[] as $path) {
+        foreach (Caller::call('scandir', $this->directory)?:[] as $path) {
             if ($path === '.' || $path === '..') {
                 continue;
             }
