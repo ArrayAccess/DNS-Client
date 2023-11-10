@@ -35,6 +35,9 @@ class Buffer
     {
         $out = substr($buffer, $offset, $length);
         $offset += $length;
+        if ($offset > ($max = strlen($buffer))) {
+            $offset = $max;
+        }
         return $out;
     }
 
