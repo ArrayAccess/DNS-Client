@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace ArrayAccess\DnsRecord\Utils;
 
-use function error_clear_last;
+use Throwable;
 use function restore_error_handler;
 use function set_error_handler;
 
@@ -21,10 +21,14 @@ class Caller
         set_error_handler(static function ($code, $message) use (&$errorCode, &$errorMessage) {
             $errorCode = $code;
             $errorMessage = $message;
-            error_clear_last();
         });
         try {
             return $callable(...$args);
+        } catch (Throwable $e) {
+            $errorCode = $e->getCode();
+            $errorMessage = $e->getMessage();
+            // error returning null
+            return null;
         } finally {
             restore_error_handler();
         }
@@ -37,7 +41,7 @@ class Caller
         callable $callable,
         ...$args
     ) {
-        set_error_handler(static fn() => error_clear_last());
+        set_error_handler(static fn () => null);
         try {
             return $callable(...$args);
         } finally {
