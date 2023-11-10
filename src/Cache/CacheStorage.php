@@ -15,6 +15,8 @@ use function sprintf;
 
 class CacheStorage implements CacheStorageInterface
 {
+    const PREFIX = 'php_dns_client_';
+
     /**
      * Cache adapter object
      *
@@ -54,7 +56,7 @@ class CacheStorage implements CacheStorageInterface
             ->expiresAfter($ttl??self::DEFAULT_TTL);
         return $this->getAdapter()?->saveItem(
             $cacheItem
-        );
+        )?:false;
     }
 
     /**
@@ -85,7 +87,7 @@ class CacheStorage implements CacheStorageInterface
      */
     public function deleteItem(PacketRequestDataInterface|string $key): bool
     {
-        return $this->getAdapter()?->deleteItem($this->getCacheName($key));
+        return $this->getAdapter()?->deleteItem($this->getCacheName($key))?:false;
     }
 
     /**
@@ -95,7 +97,7 @@ class CacheStorage implements CacheStorageInterface
     {
         return $this->getAdapter()?->deleteItems(
             ...array_values(array_map([$this, 'getCacheName'], $keys))
-        );
+        )?:false;
     }
 
     /**
@@ -104,7 +106,7 @@ class CacheStorage implements CacheStorageInterface
     public function getCacheName(PacketRequestDataInterface|string $key): string
     {
         return is_object($key)
-            ? sprintf('php_dns_client_%s', md5($key->getQueryMessage()))
+            ? sprintf('%s%s', self::PREFIX, md5($key->getQueryMessage()))
             : $key;
     }
 }
