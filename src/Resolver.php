@@ -17,6 +17,7 @@ use ArrayAccess\DnsRecord\Packet\Question;
 use ArrayAccess\DnsRecord\Packet\RequestData;
 use ArrayAccess\DnsRecord\Packet\Response;
 use ArrayAccess\DnsRecord\ResourceRecord\Definitions\QClass\IN;
+use ArrayAccess\DnsRecord\ResourceRecord\RRTypes\OPT;
 use ArrayAccess\DnsRecord\Traits\PacketSenderTrait;
 use ArrayAccess\DnsRecord\Utils\Lookup;
 use Throwable;
@@ -27,10 +28,70 @@ class Resolver
 {
     use PacketSenderTrait;
 
+    protected bool $cdFlag = false;
+
+    protected bool $adFlag = true;
+
+    /**
+     * request DNSSEC values, by setting the DO flag to 1; this actually makes
+     * the resolver add an OPT RR to the additional section, and sets the DO flag
+     * in this RR to 1
+     */
+    protected bool $dnsSec = false;
+
+    /**
+     * if we should set the recursion desired bit to 1 or 0.
+     *
+     * by default, this is set to true, the DNS server to perform a recursive
+     * request. If set to false, the RD bit will be set to 0, and the server will
+     * not perform recursion on the request.
+     */
+    public bool $recurse = true;
+
     public function __construct(
         protected ?DnsServerStorage $dnsServerStorage = null,
         protected ?CacheStorageInterface $cache = null
     ) {
+    }
+
+    public function isCdFlag(): bool
+    {
+        return $this->cdFlag;
+    }
+
+    public function setCdFlag(bool $cdFlag): void
+    {
+        $this->cdFlag = $cdFlag;
+    }
+
+    public function isAdFlag(): bool
+    {
+        return $this->adFlag;
+    }
+
+    public function setAdFlag(bool $adFlag): void
+    {
+        $this->adFlag = $adFlag;
+    }
+
+    public function isDnsSec(): bool
+    {
+        return $this->dnsSec;
+    }
+
+    public function setDnsSec(bool $dnsSec): void
+    {
+        $this->dnsSec = $dnsSec;
+    }
+
+    public function isRecurse(): bool
+    {
+        return $this->recurse;
+    }
+
+    public function setRecurse(bool $recurse): void
+    {
+        $this->recurse = $recurse;
     }
 
     public function getCache(): CacheStorageInterface
@@ -64,18 +125,37 @@ class Resolver
      * @param string $name
      * @param string $type
      * @param string $class
+     * @param ?bool $adFlag
+     * @param ?bool $cdFlag
+     * @param ?bool $dnsSec
+     * @param ?bool $recurse
      * @param string ...$server
      * @return PacketRequestDataInterface
      */
-    protected function createQueryOpcode(
+    public function createQueryOpcode(
         int|string|ResourceRecordOpcodeInterface $opcode,
         string $name,
         string $type = 'A',
-        string $class = 'IN',
+        string $class = IN::NAME,
+        ?bool $adFlag = null,
+        ?bool $cdFlag = null,
+        ?bool $dnsSec = null,
+        ?bool $recurse = null,
         string ...$server
     ) : PacketRequestDataInterface {
+        $adFlag ??= $this->isAdFlag();
+        $cdFlag ??= $this->isCdFlag();
+        $dnsSec ??= $this->isDnsSec();
+        $recurse ??= $this->isRecurse();
+
         // IN as default
-        $class = trim($class?:'IN')?:'IN';
+        $class = trim($class?:IN::NAME)?:IN::NAME;
+        $class = Lookup::resourceClass($class);
+        $type = Lookup::resourceType($type);
+        $isOpt = $type->getName() === OPT::TYPE;
+        if ($isOpt) { // if is OPT fallback to A
+            $type = 'A';
+        }
         $question = new Question($name, $type, $class);
         $dns = $this->getDnsServerStorage();
         if (!empty($server)) {
@@ -85,11 +165,18 @@ class Resolver
             }
             $dns = new DnsServerStorage(...$ss);
         }
-        return new RequestData(
-            Header::createQueryHeader($opcode),
+        $requestData = new RequestData(
+            Header::createQueryHeader($opcode, null, $adFlag, $cdFlag, $recurse),
             $dns,
-            $question,
+            $question
         );
+
+        if ($isOpt || $dnsSec) {
+            $requestData
+                ->getAdditionalRecords()
+                ->add(OPT::create($question->getType()->getValue()));
+        }
+        return $requestData;
     }
 
     /**
@@ -110,6 +197,8 @@ class Resolver
             $name,
             $type,
             $class,
+            $this->isAdFlag(),
+            $this->isCdFlag(),
             ...$server
         );
     }
@@ -132,6 +221,8 @@ class Resolver
             $name,
             $type,
             $class,
+            $this->isAdFlag(),
+            $this->isCdFlag(),
             ...$server
         );
     }
@@ -154,7 +245,11 @@ class Resolver
         }
 
         $requests = [];
-        $header = Header::createQueryHeader();
+        $header = Header::createQueryHeader(
+            adFlag: $this->adFlag,
+            cdFlag: $this->cdFlag,
+            rdFlag: $this->recurse
+        );
         $dns    = $this->getDnsServerStorage();
         foreach ($types as $key => $type) {
             $requests[$key] = new RequestData($header, $dns, new Question(

@@ -17,6 +17,7 @@ use ArrayAccess\DnsRecord\ResourceRecord\Definitions\Opcode\IQuery;
 use ArrayAccess\DnsRecord\ResourceRecord\Definitions\Opcode\Query;
 use ArrayAccess\DnsRecord\ResourceRecord\Definitions\QClass\IN;
 use ArrayAccess\DnsRecord\ResourceRecord\RRTypes\A;
+use ArrayAccess\DnsRecord\ResourceRecord\RRTypes\OPT;
 use PHPUnit\Framework\TestCase;
 use Throwable;
 use function sprintf;
@@ -121,6 +122,7 @@ class ResolverTest extends TestCase
             )
         );
     }
+
     public function testQuery()
     {
         $resolver = new Resolver();
@@ -142,6 +144,19 @@ class ResolverTest extends TestCase
                 $resolver::class,
                 Query::class
             )
+        );
+        // default use dnssec
+        $this->assertNull(
+            $query->getAdditionalRecords()->getFilteredType('OPT', true),
+            'dnssec disable by default'
+        );
+        // set dns sec to true
+        $resolver->setDnsSec(true);
+        $query = $resolver->query('example.com');
+        $this->assertInstanceOf(
+            OPT::class,
+            $query->getAdditionalRecords()->getFilteredType('OPT', true),
+            'Enable dnssec and additional question contain OPT'
         );
     }
 
