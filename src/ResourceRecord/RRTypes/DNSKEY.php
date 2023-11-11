@@ -113,3 +113,4 @@ class DNSKEY extends AbstractResourceRecordType
         $this->zoneSep = ((int)$flags[15]) === 1;
     }
 }
+// @todo add toArray()

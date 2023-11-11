@@ -74,11 +74,11 @@ interface ResourceRecordTypeInterface extends Serializable
     public function getHeader() : string;
 
     /**
-     * Get message raw response answer data
+     * Get message raw all response answer data
      *
-     * @return string
+     * @return PacketMessageInterface
      */
-    public function getMessage(): string;
+    public function getMessage(): PacketMessageInterface;
 
     /**
      * The dns name
@@ -141,7 +141,8 @@ interface ResourceRecordTypeInterface extends Serializable
     /**
      * Return array data
      *
-     * @return array
+     * @return array like dns_get_record()
+     * @see \dns_get_record()
      */
     public function toArray() : array;
 }

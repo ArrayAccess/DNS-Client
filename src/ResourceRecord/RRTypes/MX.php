@@ -55,4 +55,19 @@ class MX extends AbstractResourceRecordType
     {
         return $this->exchange;
     }
+
+    /**
+     * @inheritdoc
+     */
+    public function toArray(): array
+    {
+        return  [
+            'host' => $this->getName(),
+            'class' => $this->getClass()->getName(),
+            'ttl' => $this->getTTL(),
+            'type' => $this->getType()->getName(),
+            'pri' => $this->getPreference(),
+            'target' => $this->getExchange(),
+        ];
+    }
 }

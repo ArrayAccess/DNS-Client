@@ -5,6 +5,7 @@ namespace ArrayAccess\DnsRecord\ResourceRecord\RRTypes;
 
 use ArrayAccess\DnsRecord\Abstracts\AbstractResourceRecordType;
 use function array_values;
+use function base64_encode;
 use function substr;
 
 /**
@@ -56,26 +57,27 @@ class CERT extends AbstractResourceRecordType
         //
         // copy the certificate
         //
-        $this->certificate  = substr($this->rData, 5, $this->rdLength - 5);
+        $this->certificate  = base64_encode(substr($this->rData, 5, $this->rdLength - 5));
     }
 
-    public function getFormat(): ?int
+    public function getFormat(): int
     {
-        return $this->format??null;
+        return $this->format;
     }
 
-    public function getKeyTag(): ?int
+    public function getKeyTag(): int
     {
-        return $this->keyTag??null;
+        return $this->keyTag;
     }
 
-    public function getAlgorithm(): ?string
+    public function getAlgorithm(): string
     {
-        return $this->algorithm??null;
+        return $this->algorithm;
     }
 
-    public function getCertificate(): ?string
+    public function getCertificate(): string
     {
-        return $this->certificate??null;
+        return $this->certificate;
     }
 }
+// @todo add toArray()

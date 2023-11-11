@@ -47,6 +47,13 @@ interface PacketResourceRecordsInterface extends IteratorAggregate, Countable, S
     public function getFilteredType(string $type, bool $single = false) : null|array|ResourceRecordTypeInterface;
 
     /**
+     * Return array records
+     * @uses ResourceRecordTypeInterface::toArray()
+     * @return array<array>
+     */
+    public function toArray() : array;
+
+    /**
      * @return Traversable<ResourceRecordTypeInterface>
      */
     public function getIterator(): Traversable;

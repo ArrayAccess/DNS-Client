@@ -194,6 +194,7 @@ class Question implements PacketQuestionInterface
      * @param int $type
      * @param int $class
      * @return Question
+     * @noinspection PhpDocMissingThrowsInspection
      */
     public static function fromFilteredResponse(
         string $name,

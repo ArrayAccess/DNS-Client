@@ -125,7 +125,6 @@ abstract class AbstractResourceRecordType implements ResourceRecordTypeInterface
                 'Response header length is invalid'
             );
         }
-
         [
             'type' => $type,
             'class' => $class,
@@ -201,11 +200,11 @@ abstract class AbstractResourceRecordType implements ResourceRecordTypeInterface
     }
 
     /**
-     * @return string
+     * @inheritdoc
      */
-    public function getMessage(): string
+    public function getMessage(): PacketMessageInterface
     {
-        return $this->getHeader() . $this->getRData();
+        return $this->message;
     }
 
     /**
@@ -315,7 +314,7 @@ abstract class AbstractResourceRecordType implements ResourceRecordTypeInterface
             'host' => $this->getName(),
             'class' => $this->getClass()->getName(),
             'ttl' => $this->getTTL(),
-            'type' => $this->getType(),
+            'type' => $this->getType()->getName(),
             'value' => $this->getValue(),
         ];
     }

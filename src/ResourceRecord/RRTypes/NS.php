@@ -30,4 +30,18 @@ class NS extends AbstractResourceRecordType
     {
         $this->value = Buffer::readLabel($message, $rdataOffset);
     }
+
+    /**
+     * @inheritdoc
+     */
+    public function toArray(): array
+    {
+        return [
+            'host' => $this->getName(),
+            'class' => $this->getClass()->getName(),
+            'ttl' => $this->getTTL(),
+            'type' => $this->getType()->getName(),
+            'target' => $this->getValue(),
+        ];
+    }
 }

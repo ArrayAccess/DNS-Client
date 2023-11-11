@@ -40,4 +40,29 @@ class HINFO extends AbstractResourceRecordType
             $this->rdLength - strlen($this->cpu)
         );
     }
+
+    public function getCpu(): string
+    {
+        return $this->cpu;
+    }
+
+    public function getOs(): string
+    {
+        return $this->os;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function toArray(): array
+    {
+        return  [
+            'host' => $this->getName(),
+            'class' => $this->getClass()->getName(),
+            'ttl' => $this->getTTL(),
+            'type' => $this->getType()->getName(),
+            'cpu' => $this->getCpu(),
+            'os' => $this->getOs(),
+        ];
+    }
 }

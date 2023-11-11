@@ -14,12 +14,19 @@ class RRSIG extends AbstractResourceRecordType
     const TYPE = 'RRSIG';
 
     protected int $sigType;
+
     protected int $algorithm;
+
     protected int $labels;
+
     protected int $originalttl;
+
     protected int $expiration;
+
     protected int $inception;
+
     protected int $keyTag;
+
     protected string $signer;
 
     protected string $signature;
@@ -30,7 +37,6 @@ class RRSIG extends AbstractResourceRecordType
     protected function parseRData(string $message, int $rdataOffset): void
     {
         $stuff = Buffer::read($message, $rdataOffset, 18);
-        //$length = $ans_header['length'] - 18;
         [
             'type' => $this->sigType,
             'algorithm' => $this->algorithm,
@@ -47,11 +53,6 @@ class RRSIG extends AbstractResourceRecordType
         $this->signature = base64_encode(
             Buffer::read($message, $rdataOffset, $this->rdLength - (strlen($this->signer) + 2) - 18)
         );
-    }
-
-    public function getType(): string
-    {
-        return $this->type;
     }
 
     public function getSigType(): int
@@ -97,5 +98,23 @@ class RRSIG extends AbstractResourceRecordType
     public function getSignature(): string
     {
         return $this->signature;
+    }
+    public function toArray(): array
+    {
+        return [
+            'host' => $this->getName(),
+            'ttl' => $this->getTTL(),
+            'class' => $this->getClass()->getName(),
+            'type' => $this->getType()->getName(),
+            'labels' => $this->getLabels(),
+            'sigtype' => $this->getSigType(),
+            'originalttl' => $this->getOriginalttl(),
+            'expiration' => $this->getExpiration(),
+            'inception' => $this->getInception(),
+            'keytag' => $this->getKeyTag(),
+            'algorithm' => $this->getAlgorithm(),
+            'signer' => $this->getSigner(),
+            'signature' => $this->getSignature(),
+        ];
     }
 }

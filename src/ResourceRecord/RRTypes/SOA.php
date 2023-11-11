@@ -43,6 +43,7 @@ class SOA extends AbstractResourceRecordType
             "Nserial/Nrefresh/Nretry/Nexpire/NminTTL",
             Buffer::read($message, $rdataOffset, 20)
         );
+
         $this->value = sprintf(
             '%s. %s. %d %d %d %d %d',
             $this->mName,
@@ -54,25 +55,6 @@ class SOA extends AbstractResourceRecordType
             $this->minimumTTL
         );
     }
-
-    /**
-     * @return string
-     * @link https://datatracker.ietf.org/doc/rfc1995/
-     */
-//    public function getQueryMessage(): string
-//    {
-//        $query = Lookup::compressLabel($this->mName);
-//        $query .= Lookup::compressLabel($this->rName);
-//        $query .= pack('N*', $this->serial, $this->refresh, $this->retry, $this->expire, $this->minimumTTL);
-//        return $query;
-//        return Lookup::compressLabel(
-//            sprintf(
-//                '%s. IN SOA serial=%d',
-//                $this->name,
-//                $this->serial
-//            )
-//        );
-//    }
 
     public function getMinimumTTL(): int
     {
@@ -107,5 +89,25 @@ class SOA extends AbstractResourceRecordType
     public function getRetry(): int
     {
         return $this->retry;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function toArray(): array
+    {
+        return [
+            'host' => $this->getName(),
+            'class' => $this->getClass()->getName(),
+            'ttl' => $this->getTTL(),
+            'type' => $this->getType()->getName(),
+            'mname' => $this->getMName(),
+            'rname' => $this->getRName(),
+            'serial' => $this->getSerial(),
+            'refresh' => $this->getRefresh(),
+            'retry' => $this->getRetry(),
+            'expire' => $this->getExpire(),
+            'minimum-ttl' => $this->getMinimumTTL(),
+        ];
     }
 }

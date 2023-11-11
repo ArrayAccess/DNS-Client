@@ -53,21 +53,33 @@ class Buffer
 
     public static function readLabel(string $buffer, int &$offset, string $delimiter = '.'): string
     {
-        $out = [];
-        while (($length = ord(self::read($buffer, $offset, 1))) > 0) {
-            if ($length < 64) {
-                $out[] =  self::read($buffer, $offset, $length);
-                continue;
-            }
-            // 0x3f = 63
-            $currentPosition = (($length & 63) << 8) + ord(self::read($buffer, $offset, 1));
-            while (($len = ord(substr($buffer, $currentPosition, 1))) && $len > 0) {
-                $out[] = substr($buffer, $currentPosition + 1, $len);
-                $currentPosition += $len + 1;
-            }
-            break;
+        $bufferLength = strlen($buffer);
+        if ($bufferLength <= $offset) {
+            return '';
         }
-
+        $out = [];
+        while (true) {
+            if ($bufferLength <= $offset) {
+                break;
+            }
+            $length = ord($buffer[$offset]);
+            if ($length === 0) {
+                ++$offset;
+                break;
+            } elseif (($length & 0xc0) === 0xc0) {
+                $pointer = ord($buffer[$offset]) << 8 | ord($buffer[$offset+1]);
+                $pointer = $pointer & 0x3fff;
+                $name2 = self::readLabel($buffer, $pointer);
+                $out[] = $name2;
+                $offset += 2;
+                break;
+            } else {
+                ++$offset;
+                $elem = substr($buffer, $offset, $length);
+                $out[] = $elem;
+                $offset += $length;
+            }
+        }
         return implode($delimiter, $out);
     }
 

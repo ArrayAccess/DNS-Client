@@ -21,8 +21,6 @@ class SRV extends AbstractResourceRecordType
 
     protected int $port;
 
-    protected string $target;
-
     /**
      * @inheritdoc
      */
@@ -38,6 +36,35 @@ class SRV extends AbstractResourceRecordType
             Buffer::read($this->rData, $offset, 6)
         );
 
-        $this->target = Buffer::readLabel($this->rData, $offset);
+        $this->value = Buffer::readLabel($this->rData, $offset);
+    }
+
+    public function getPriority(): int
+    {
+        return $this->priority;
+    }
+
+    public function getWeight(): int
+    {
+        return $this->weight;
+    }
+
+    public function getPort(): int
+    {
+        return $this->port;
+    }
+
+    public function toArray(): array
+    {
+        return [
+            'host' => $this->getName(),
+            'class' => $this->getClass()->getName(),
+            'ttl' => $this->getTTL(),
+            'type' => $this->getType()->getName(),
+            'pri' => $this->getPriority(),
+            'weight' => $this->getWeight(),
+            'port' => $this->getPort(),
+            'target' => $this->getValue(),
+        ];
     }
 }

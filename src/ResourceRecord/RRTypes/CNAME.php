@@ -20,18 +20,25 @@ class CNAME extends AbstractResourceRecordType
 {
     const TYPE = 'CNAME';
 
-    protected string $cname;
-
     /**
      * @inheritdoc
      */
     protected function parseRData(string $message, int $rdataOffset): void
     {
-        $this->cname = Buffer::readLabel($message, $rdataOffset);
+        $this->value = Buffer::readLabel($message, $rdataOffset);
     }
 
-    public function getCname(): string
+    /**
+     * @inheritdoc
+     */
+    public function toArray(): array
     {
-        return $this->cname;
+        return [
+            'host' => $this->getName(),
+            'class' => $this->getClass()->getName(),
+            'ttl' => $this->getTTL(),
+            'type' => $this->getType()->getName(),
+            'target' => $this->getValue(),
+        ];
     }
 }

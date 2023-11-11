@@ -115,7 +115,7 @@ class OPT extends AbstractResourceRecordType implements ResourceRecordMetaTypeIn
         // build the TTL value based on the local values
         //
         return pack(
-            'CCCC',
+            'C4',
             $this->extended_rcode,
             $this->version,
             ($this->do << 7),
@@ -123,3 +123,4 @@ class OPT extends AbstractResourceRecordType implements ResourceRecordMetaTypeIn
         );
     }
 }
+// @todo add toArray()

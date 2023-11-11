@@ -152,7 +152,8 @@ class Resolver
         $class = trim($class?:IN::NAME)?:IN::NAME;
         $class = Lookup::resourceClass($class);
         $type = Lookup::resourceType($type);
-        $isOpt = $type->getName() === OPT::TYPE;
+        $typeName = $type->getName();
+        $isOpt = $typeName === OPT::TYPE;
         if ($isOpt) { // if is OPT fallback to A
             $type = 'A';
         }
@@ -165,12 +166,13 @@ class Resolver
             }
             $dns = new DnsServerStorage(...$ss);
         }
+
+        $header = Header::createQueryHeader($opcode, null, $adFlag, $cdFlag, $recurse);
         $requestData = new RequestData(
-            Header::createQueryHeader($opcode, null, $adFlag, $cdFlag, $recurse),
+            $header,
             $dns,
             $question
         );
-
         if ($isOpt || $dnsSec) {
             $requestData
                 ->getAdditionalRecords()

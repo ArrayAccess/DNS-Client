@@ -305,6 +305,14 @@ interface PacketHeaderInterface extends Serializable
     public function withANCount(int $an) : static;
 
     /**
+     * With NS count
+     *
+     * @param int $ns
+     * @return $this
+     */
+    public function withNSCount(int $ns) : static;
+
+    /**
      * With QD Count
      * @param int $qd
      * @return $this

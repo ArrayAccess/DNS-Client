@@ -31,3 +31,4 @@ class MR extends AbstractResourceRecordType
         $this->value = Buffer::readLabel($message, $rdataOffset);
     }
 }
+// @todo add toArray()

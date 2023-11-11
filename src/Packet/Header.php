@@ -343,6 +343,17 @@ class Header implements PacketHeaderInterface
     /**
      * @inheritdoc
      */
+    public function withNSCount(int $ns): static
+    {
+        $obj = clone $this;
+        $obj->nscount = $ns;
+        $obj->message = null;
+        return $obj;
+    }
+
+    /**
+     * @inheritdoc
+     */
     public function withQDCount(int $qd) : static
     {
         $obj = clone $this;

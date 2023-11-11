@@ -7,6 +7,8 @@ use ArrayAccess\DnsRecord\Interfaces\Packet\PacketResourceRecordsInterface;
 use ArrayAccess\DnsRecord\Interfaces\ResourceRecord\ResourceRecordTypeInterface;
 use ArrayIterator;
 use Traversable;
+use function array_map;
+use function array_values;
 use function md5;
 use function serialize;
 use function strtoupper;
@@ -84,6 +86,14 @@ class Records implements PacketResourceRecordsInterface
         }
 
         return $result === [] ? null : $result;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function toArray(): array
+    {
+        return array_map(static fn ($e) => $e->toArray(), array_values($this->getRecords()));
     }
 
     /**
