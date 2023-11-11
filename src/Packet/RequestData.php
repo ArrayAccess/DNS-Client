@@ -140,6 +140,7 @@ class RequestData implements PacketRequestDataInterface
             $query .= $record->getQueryMessage();
             $query .= "\0";
         }
+
         // get additional
         foreach ($this->getAdditionalRecords()->getRecords() as $record) {
             $arCount++;
@@ -149,7 +150,8 @@ class RequestData implements PacketRequestDataInterface
             $query .= "\0";
         }
 
-        $this->header = $this->getHeader()
+        $this->header = $this
+            ->getHeader()
             ->withARCount($arCount)
             ->withQDCount($qdCount)
             ->withANCount($anCount)
