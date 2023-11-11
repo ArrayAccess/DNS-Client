@@ -66,7 +66,7 @@ class Question implements PacketQuestionInterface
      */
     public function __construct(
         string $name,
-        string|Int|ResourceRecordTypeInterface $type,
+        string|Int|ResourceRecordTypeInterface|ResourceRecordQTypeDefinitionInterface $type,
         string|int|ResourceRecordClassInterface $class,
         bool $disableInit = false
     ) {
@@ -79,12 +79,12 @@ class Question implements PacketQuestionInterface
     }
 
     private function initType(
-        string|Int|ResourceRecordTypeInterface $type,
+        string|Int|ResourceRecordTypeInterface|ResourceRecordQTypeDefinitionInterface $type,
     ): void {
         $this->type ??= Lookup::resourceType($type);
     }
 
-    private function initClass(string|Int|ResourceRecordTypeInterface $type, bool $internal = false): void
+    private function initClass(string|Int|ResourceRecordClassInterface $type): void
     {
         if (isset($this->class)) {
             return;
@@ -113,13 +113,13 @@ class Question implements PacketQuestionInterface
      * Init constructor
      *
      * @param string $name
-     * @param string|Int|ResourceRecordTypeInterface $type
+     * @param string|Int|ResourceRecordTypeInterface|ResourceRecordQTypeDefinitionInterface $type
      * @param string|int|ResourceRecordClassInterface $class
      * @return void
      */
     private function init(
         string $name,
-        string|Int|ResourceRecordTypeInterface $type,
+        string|Int|ResourceRecordTypeInterface|ResourceRecordQTypeDefinitionInterface $type,
         string|int|ResourceRecordClassInterface $class
     ): void {
         $this->initType($type);
@@ -203,6 +203,9 @@ class Question implements PacketQuestionInterface
         /** @noinspection PhpUnhandledExceptionInspection */
         $object = (new ReflectionClass(__CLASS__))
             ->newInstanceWithoutConstructor();
+        /**
+         * @var Question $object
+         */
         try {
             $object->initType($type);
         } catch (Throwable) {
