@@ -22,7 +22,8 @@ composer require arrayaccess/dns-client
 
 ```php
 use ArrayAccess\DnsRecord\Cache\Adapter\Psr6CacheAdapter;
-use ArrayAccess\DnsRecord\DnsServerStorage;use ArrayAccess\DnsRecord\Resolver;
+use ArrayAccess\DnsRecord\DnsServerStorage;
+use ArrayAccess\DnsRecord\Resolver;
 
 $cache = new Psr6CacheAdapter();
 // $cache->setCacheItemPool($cacheProvider);
