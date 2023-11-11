@@ -273,7 +273,10 @@ class Header implements PacketHeaderInterface
      */
     public static function createQueryHeader(
         int|string|ResourceRecordOpcodeInterface $opcode = Lookup::OPCODE_QUERY,
-        ?int $id = null
+        ?int $id = null,
+        bool $adFlag = true,
+        bool $cdFlag = false,
+        bool $rdFlag = true
     ) : PacketHeaderInterface {
         if ($id === null) {
             // 160-bit max 65535 -> then reset to 1
@@ -295,9 +298,9 @@ class Header implements PacketHeaderInterface
         $header->tc = 0;
         $header->z = 0; // always 0
         $header->qdcount = 1;
-        $header->rd = 1; // recursion desired
-        $header->ad = 1;
-        $header->cd = 0;
+        $header->rd = $rdFlag ? 1 : 0; // recursion desired
+        $header->ad = $adFlag ? 1 : 0; // authentic data
+        $header->cd = $cdFlag ? 1 : 0;
         $header->ra = 0; // ra is zero cause query
         $header->rcode = Lookup::RCODE_NOERROR; // use no error
         $header->ancount = 0; // ancount is 0 because the query
@@ -374,6 +377,17 @@ class Header implements PacketHeaderInterface
     {
         $obj = clone $this;
         $obj->cd = $cd ? 1 : 0;
+        $obj->message = null;
+        return $obj;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function withRDFlag(bool $rd): static
+    {
+        $obj = clone $this;
+        $obj->rd = $rd ? 1 : 0;
         $obj->message = null;
         return $obj;
     }
