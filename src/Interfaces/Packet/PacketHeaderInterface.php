@@ -44,13 +44,19 @@ interface PacketHeaderInterface extends Serializable
     /**
      * Crate query header for request dns server
      *
-     * @param int|string $opcode
+     * @param int|string|ResourceRecordOpcodeInterface $opcode
      * @param ?int $id
+     * @param bool $adFlag
+     * @param bool $cdFlag
+     * @param bool $rdFlag
      * @return PacketHeaderInterface
      */
     public static function createQueryHeader(
-        int|string $opcode = Lookup::OPCODE_QUERY,
-        ?int $id = null
+        int|string|ResourceRecordOpcodeInterface $opcode = Lookup::OPCODE_QUERY,
+        ?int $id = null,
+        bool $adFlag = true,
+        bool $cdFlag = false,
+        bool $rdFlag = true
     ) : PacketHeaderInterface;
 
     /**
