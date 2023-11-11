@@ -330,6 +330,14 @@ interface PacketHeaderInterface extends Serializable
     public function withCDFlag(bool $cd) : static;
 
     /**
+     * With recursion desired
+     *
+     * @param bool $rd
+     * @return $this
+     */
+    public function withRDFlag(bool $rd) : static;
+
+    /**
      * With identity
      * 1 - 65535
      *
