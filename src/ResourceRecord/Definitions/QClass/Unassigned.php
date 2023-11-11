@@ -41,10 +41,11 @@ class Unassigned extends AbstractResourceRecordClass implements ResourceRecordQC
     public static function inRange(int $value) : bool
     {
         foreach (self::RANGES as $ranges) {
-            if ($value >= $ranges[0] && $value <= $ranges[0]) {
+            if ($value >= $ranges[0] && $value <= $ranges[1]) {
                 return true;
             }
         }
+
         return false;
     }
 

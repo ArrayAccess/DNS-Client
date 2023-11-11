@@ -6,7 +6,6 @@ namespace ArrayAccess\DnsRecord\ResourceRecord\RRTypes;
 use ArrayAccess\DnsRecord\Abstracts\AbstractResourceRecordType;
 use ArrayAccess\DnsRecord\Interfaces\ResourceRecord\ResourceRecordMetaTypeInterface;
 use ArrayAccess\DnsRecord\Packet\Message;
-use ArrayAccess\DnsRecord\Utils\Buffer;
 use ArrayAccess\DnsRecord\Utils\Lookup;
 use function pack;
 use function unpack;
@@ -22,19 +21,34 @@ use function unpack;
  *       2: |DO|                    Z                       |
  *          +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
  *
+ * Wire Format - RFC6891
+ * The type is payload size
+ *
+ *      +------------+--------------+------------------------------+
+ *      | Field Name | Field Type   | Description                  |
+ *      +------------+--------------+------------------------------+
+ *      | NAME       | domain name  | MUST be 0 (root domain)      |
+ *      | TYPE       | u_int16_t    | OPT (41)                     |
+ *      | CLASS      | u_int16_t    | requestor's UDP payload size |
+ *      | TTL        | u_int32_t    | extended RCODE and flags     |
+ *      | RDLEN      | u_int16_t    | length of all RDATA          |
+ *      | RDATA      | octet stream | {attribute,value} pairs      |
+ *      +------------+--------------+------------------------------+
+ *
  * @link https://datatracker.ietf.org/doc/html/rfc1035#section-3.4.1
+ * @link https://datatracker.ietf.org/doc/html/rfc6891#section-6.1.2
  */
 class OPT extends AbstractResourceRecordType implements ResourceRecordMetaTypeInterface
 {
     const TYPE = 'OPT';
 
-    protected int $extended_rcode;
+    protected int $extended_rcode = 0;
 
-    protected int $version;
+    protected int $version = 0;
 
-    protected int $do;
+    protected int $do = 0;
 
-    protected int $z;
+    protected int $z = 0;
 
     protected int $option_code = 0;
 
@@ -43,37 +57,38 @@ class OPT extends AbstractResourceRecordType implements ResourceRecordMetaTypeIn
     protected string $option_data = '';
 
     /**
-     * @param string $name
+     * @param int $extendedRcode
      * @param int $do
+     * @param int $version
+     * @param int $z
+     * @param int $classSize
      * @return OPT
      * @noinspection PhpDocMissingThrowsInspection
      */
-    public static function create(string $name = '', int $do = 1): OPT
-    {
-        $name = $name ? Buffer::compressLabel($name) : "\0";
-        $message = new Message(
-            $name . pack(
-                "nnNn",
-                Lookup::resourceType('OPT')->getValue(),
-                Lookup::QCLASS_LIST['IN'],
-                pack(
-                    'CCCC',
-                    0,
-                    0,
-                    ($do << 7),
-                    0
-                ),
-                0
-            )
+    public static function create(
+        int $extendedRcode = 0,
+        int $do = 1,
+        int $version = 0,
+        int $z = 0,
+        int $classSize = Lookup::MAX_TCP_SIZE
+    ): OPT {
+        $data = pack(
+            "cnnCCCCn",
+            0, // empty
+            Lookup::resourceType('OPT')->getValue(),
+            $classSize,
+            $extendedRcode, // extended_rcode
+            $version, // version
+            ($do << 7), // DO
+            $z, // z
+            0 // end
         );
+
+        // https://datatracker.ietf.org/doc/html/rfc6891#section-6.1.2
+        $message = new Message($data);
 
         /** @noinspection PhpUnhandledExceptionInspection */
         return new self($message, 0);
-    }
-
-    protected function generateTTL()
-    {
-        return unpack('N', $this->getQueryMessage())[1];
     }
 
     protected function parseRData(string $message, int $rdataOffset): void
@@ -84,7 +99,7 @@ class OPT extends AbstractResourceRecordType implements ResourceRecordMetaTypeIn
             'do' => $do,
             'z' => $this->z,
         ] = unpack('Cextended/Cversion/Cdo/Cz', pack('N', $this->ttl));
-        $this->do               = ($do >> 7);
+        $this->do = ($do >> 7);
         if ($this->rdLength > 0) {
             [
                 'option_code' => $this->option_code,

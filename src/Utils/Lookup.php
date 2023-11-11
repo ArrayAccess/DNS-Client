@@ -391,9 +391,11 @@ class Lookup
             if (PrivateUse::RANGE_START <= $class && PrivateUse::RANGE_END >= $class) {
                 return new PrivateUse($class);
             }
+
             if (Unassigned::inRange($class)) {
                 return new Unassigned($class);
             }
+
             throw new InvalidArgumentException(
                 sprintf(
                     'QCLASS value "%d" is not valid',
