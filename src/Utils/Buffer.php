@@ -10,6 +10,7 @@ use ArrayAccess\DnsRecord\Interfaces\ResourceRecord\ResourceRecordClassInterface
 use ArrayAccess\DnsRecord\Interfaces\ResourceRecord\ResourceRecordQTypeDefinitionInterface;
 use ArrayAccess\DnsRecord\Interfaces\ResourceRecord\ResourceRecordTypeInterface;
 use ArrayAccess\DnsRecord\Packet\Header;
+use ArrayAccess\DnsRecord\ResourceRecord\RRTypes\OPT;
 use function chr;
 use function explode;
 use function implode;
@@ -139,7 +140,7 @@ class Buffer
         return pack(
             'nnNn',
             $type->getValue(),
-            'OPT' === $type->getName() ? $class->getName() : $class->getValue(),
+            OPT::TYPE === $type->getName() ? $class->getName() : $class->getValue(),
             $ttl,
             $rdLength
         );
