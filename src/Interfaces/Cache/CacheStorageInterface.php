@@ -30,6 +30,7 @@ interface CacheStorageInterface
      * Set cache adapter
      *
      * @param CacheAdapterInterface $cacheAdapter
+     * @phpstan-ignore-next-line
      */
     public function setAdapter(CacheAdapterInterface $cacheAdapter);
 

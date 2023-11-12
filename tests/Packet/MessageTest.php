@@ -11,7 +11,7 @@ use function sprintf;
 
 class MessageTest extends TestCase
 {
-    public function testToString()
+    public function testToString() : void
     {
         $message = md5(microtime());
         $this->assertSame(
@@ -25,7 +25,7 @@ class MessageTest extends TestCase
         );
     }
 
-    public function testGetMessage()
+    public function testGetMessage() : void
     {
         $message = md5(microtime());
         $this->assertSame(

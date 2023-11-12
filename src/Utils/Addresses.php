@@ -187,6 +187,9 @@ class Addresses
 
         if ($intl_idn) {
             $domainName = $isAscii ? idn_to_utf8($domainName) : idn_to_ascii($domainName);
+            if (!$domainName) {
+                return null;
+            }
             // revert
             $domainName = ($isAscii ? idn_to_ascii($domainName) : idn_to_utf8($domainName)) ?: null;
             if (!$domainName) {
@@ -196,8 +199,12 @@ class Addresses
         } else {
             foreach ($labels as &$label) {
                 if (preg_match('/[^x00-x7F]/', $domainName)) {
-                    $label = 'xn--' . self::punycodeEncode($label);
-                    if (!$label || strlen($label) > 63) {
+                    $encode = self::punycodeEncode($label);
+                    if (!$encode) {
+                        return null;
+                    }
+                    $label = 'xn--' . $encode;
+                    if (strlen($label) > 63) {
                         return null;
                     }
                 }
@@ -365,14 +372,11 @@ class Addresses
 
         for ($i = 0; $i < $length; ++$i) {
             $byte = ord($input[$i]);
-
             if (0 === $bytesNeeded) {
-                if ($byte >= 0x00 && $byte <= 0x7F) {
+                if ($byte >= 0x00 && $byte <= 0x7F) { // @phpstan-ignore-line
                     $codePoints[] = $byte;
-
                     continue;
                 }
-
                 if ($byte >= 0xC2 && $byte <= 0xDF) {
                     $bytesNeeded = 1;
                     $codePoint = $byte & 0x1F;

@@ -110,6 +110,7 @@ final class Answers implements PacketAnswersInterface
      * Parse the response question
      *
      * @throws MalformedDataException
+     * @return PacketQuestionInterface[]
      */
     private function parseQuestions() : array
     {
@@ -155,9 +156,10 @@ final class Answers implements PacketAnswersInterface
     /**
      * Parse the records
      *
+     * @return PacketResourceRecordsInterface
      * @throws MalformedDataException
      */
-    private function parseRecords() : Records
+    private function parseRecords() : PacketResourceRecordsInterface
     {
         if (isset($this->records)) {
             return $this->records;
@@ -308,7 +310,7 @@ final class Answers implements PacketAnswersInterface
     /**
      * Magic method for serializing
      *
-     * @return array{message: Message}
+     * @return array{message: PacketMessageInterface}
      */
     public function __serialize(): array
     {
@@ -318,7 +320,7 @@ final class Answers implements PacketAnswersInterface
     /**
      * Magic method for unserialize
      *
-     * @param array $data
+     * @param array{message: PacketMessageInterface} $data
      * @return void
      */
     public function __unserialize(array $data): void

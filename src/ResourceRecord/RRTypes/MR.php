@@ -9,7 +9,7 @@ use ArrayAccess\DnsRecord\Utils\Buffer;
 /**
  * MR RDATA format (EXPERIMENTAL) - RFC1035 Section 3.3.8
  * NEWNAME A <domain-name> which specifies a mailbox which is the
- * proper rename of the specified mailbox.
+ * proper renamed of the specified mailbox.
  *
  *      +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
  *      /                   NEWNAME                    /

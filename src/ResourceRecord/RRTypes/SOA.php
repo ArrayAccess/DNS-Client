@@ -5,6 +5,7 @@ namespace ArrayAccess\DnsRecord\ResourceRecord\RRTypes;
 
 use ArrayAccess\DnsRecord\Abstracts\AbstractResourceRecordType;
 use ArrayAccess\DnsRecord\Utils\Buffer;
+use function is_array;
 use function sprintf;
 use function unpack;
 
@@ -33,27 +34,30 @@ class SOA extends AbstractResourceRecordType
     {
         $this->mName = Buffer::readLabel($message, $rdataOffset);
         $this->rName = Buffer::readLabel($message, $rdataOffset);
-        [
-            'serial' => $this->serial,
-            'refresh' => $this->refresh,
-            'retry' => $this->retry,
-            'expire' => $this->expire,
-            'minTTL' => $this->minimumTTL
-        ] = unpack(
+        $data = unpack(
             "Nserial/Nrefresh/Nretry/Nexpire/NminTTL",
             Buffer::read($message, $rdataOffset, 20)
         );
+        if (is_array($data)) {
+            [
+                'serial' => $this->serial,
+                'refresh' => $this->refresh,
+                'retry' => $this->retry,
+                'expire' => $this->expire,
+                'minTTL' => $this->minimumTTL
+            ] = $data;
 
-        $this->value = sprintf(
-            '%s. %s. %d %d %d %d %d',
-            $this->mName,
-            $this->rName,
-            $this->serial,
-            $this->refresh,
-            $this->retry,
-            $this->expire,
-            $this->minimumTTL
-        );
+            $this->value = sprintf(
+                '%s. %s. %d %d %d %d %d',
+                $this->mName,
+                $this->rName,
+                $this->serial,
+                $this->refresh,
+                $this->retry,
+                $this->expire,
+                $this->minimumTTL
+            );
+        }
     }
 
     public function getMinimumTTL(): int

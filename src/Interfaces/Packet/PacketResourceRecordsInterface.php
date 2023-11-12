@@ -20,6 +20,7 @@ interface PacketResourceRecordsInterface extends IteratorAggregate, Countable, S
      * Add record
      *
      * @param ResourceRecordTypeInterface $record
+     * @phpstan-ignore-next-line
      */
     public function add(ResourceRecordTypeInterface $record);
 
@@ -27,6 +28,7 @@ interface PacketResourceRecordsInterface extends IteratorAggregate, Countable, S
      * Remove record
      *
      * @param ResourceRecordTypeInterface $record
+     * @phpstan-ignore-next-line
      */
     public function remove(ResourceRecordTypeInterface $record);
 
@@ -42,19 +44,20 @@ interface PacketResourceRecordsInterface extends IteratorAggregate, Countable, S
      *
      * @param string $type
      * @param bool $single
-     * @return array|ResourceRecordTypeInterface|null
+     * @return array<ResourceRecordTypeInterface>|ResourceRecordTypeInterface|null
      */
     public function getFilteredType(string $type, bool $single = false) : null|array|ResourceRecordTypeInterface;
 
     /**
      * Return array records
+     *
      * @uses ResourceRecordTypeInterface::toArray()
-     * @return array<array>
+     * @return array<array<ResourceRecordTypeInterface>>
      */
     public function toArray() : array;
 
     /**
-     * @return Traversable<ResourceRecordTypeInterface>
+     * @return Traversable<string, ResourceRecordTypeInterface>
      */
     public function getIterator(): Traversable;
 }

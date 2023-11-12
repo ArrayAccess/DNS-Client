@@ -10,7 +10,7 @@ use function sprintf;
 /**
  * User defined dns server
  */
-class CustomDnsServer extends AbstractDnsServer
+final class CustomDnsServer extends AbstractDnsServer
 {
     use DisableSetterTrait;
 

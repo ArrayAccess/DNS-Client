@@ -5,6 +5,7 @@ namespace ArrayAccess\DnsRecord\ResourceRecord\RRTypes;
 
 use ArrayAccess\DnsRecord\Abstracts\AbstractResourceRecordType;
 use function base64_encode;
+use function is_array;
 use function sprintf;
 use function unpack;
 
@@ -74,13 +75,18 @@ class DNSKEY extends AbstractResourceRecordType
      */
     protected function parseRData(string $message, int $rdataOffset): void
     {
+        $data = unpack("nflags/Cprotocol/Calgorithm/a*pubKey", $this->rData);
+        if (!is_array($data)) {
+            return;
+        }
+
         [
             'flags' => $this->flags,
             // https://datatracker.ietf.org/doc/html/rfc4034#section-2.1.2
             'protocol' => $this->protocol,
             'algorithm' => $this->algorithm,
             'pubKey' => $pubKey,
-        ] = unpack("nflags/Cprotocol/Calgorithm/a*pubKey", $this->rData);
+        ] = $data;
         //  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 = 16
         // convert binary flags
         $flags = sprintf("%016b\n", $this->flags);

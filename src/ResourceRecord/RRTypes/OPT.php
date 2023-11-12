@@ -7,6 +7,7 @@ use ArrayAccess\DnsRecord\Abstracts\AbstractResourceRecordType;
 use ArrayAccess\DnsRecord\Interfaces\ResourceRecord\ResourceRecordMetaTypeInterface;
 use ArrayAccess\DnsRecord\Packet\Message;
 use ArrayAccess\DnsRecord\Utils\Lookup;
+use function is_array;
 use function pack;
 use function unpack;
 
@@ -93,18 +94,24 @@ class OPT extends AbstractResourceRecordType implements ResourceRecordMetaTypeIn
 
     protected function parseRData(string $message, int $rdataOffset): void
     {
-        [
-            'extended' => $this->extended_rcode,
-            'version' => $this->version,
-            'do' => $do,
-            'z' => $this->z,
-        ] = unpack('Cextended/Cversion/Cdo/Cz', pack('N', $this->ttl));
-        $this->do = ($do >> 7);
-        if ($this->rdLength > 0) {
+        $data = unpack('Cextended/Cversion/Cdo/Cz', pack('N', $this->ttl));
+        if (is_array($data)) {
             [
-                'option_code' => $this->option_code,
-                'option_length' => $this->option_length
-            ] = unpack('noption_code/noption_length', $this->rData);
+                'extended' => $this->extended_rcode,
+                'version' => $this->version,
+                'do' => $do,
+                'z' => $this->z,
+            ] = $data;
+            $this->do = ($do >> 7);
+        }
+        if ($this->rdLength > 0) {
+            $data = unpack('noption_code/noption_length', $this->rData);
+            if (is_array($data)) {
+                [
+                    'option_code' => $this->option_code,
+                    'option_length' => $this->option_length
+                ] = $data;
+            }
             $this->option_data = substr($this->rData, 4);
         }
     }

@@ -4,7 +4,9 @@ declare(strict_types=1);
 namespace ArrayAccess\DnsRecord\ResourceRecord\RRTypes;
 
 use ArrayAccess\DnsRecord\Abstracts\AbstractResourceRecordType;
+use function is_array;
 use function substr;
+use function unpack;
 
 /**
  * DNS Certification Authority Authorization (CAA) Resource Record - CAA RFC6844
@@ -27,29 +29,32 @@ class CAA extends AbstractResourceRecordType
     /**
      * @var int
      */
-    protected int $flags;
+    protected int $flags = 0;
 
     /**
      * @var string
      */
-    protected string $tag;
+    protected string $tag = '';
 
     /**
      * @var int
      */
-    protected int $tagLength;
+    protected int $tagLength = 0;
 
     /**
      * @inheritdoc
      */
     protected function parseRData(string $message, int $rdataOffset): void
     {
+        $data = unpack('Cflags/CtagLength', substr($this->rData, 0, 2));
+        if (!is_array($data)) {
+            return;
+        }
         // unpack the flags and tag length
         [
             'flags' => $this->flags,
             'tagLength' => $this->tagLength,
-
-        ] = unpack('Cflags/CtagLength', substr($this->rData, 0, 2));
+        ] = $data;
         $this->tag      = substr($this->rData, 2, $this->tagLength);
         $this->value    = substr($this->rData, 2 + $this->tagLength);
     }
@@ -77,7 +82,7 @@ class CAA extends AbstractResourceRecordType
      *     type:string,
      *     flags:int,
      *     tag:string,
-     *     value:string,
+     *     value: ?string,
      * }
      */
     public function toArray(): array
@@ -89,7 +94,7 @@ class CAA extends AbstractResourceRecordType
             'type' => $this->getType()->getName(),
             'flags' => $this->getFlags(),
             'tag' => $this->getTag(),
-            'value' => $this->getValue(),
+            'value' => $this->getValue()
         ];
     }
 }

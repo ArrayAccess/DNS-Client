@@ -18,7 +18,7 @@ class CallerTest extends TestCase
 {
 
     #[WithoutErrorHandler]
-    public function testCall()
+    public function testCall() : void
     {
         $message = 'sample: '.md5(microtime());
         $code = rand(0, 10);
@@ -56,7 +56,7 @@ class CallerTest extends TestCase
     }
 
     #[WithoutErrorHandler]
-    public function testTrack()
+    public function testTrack() : void
     {
         $message = 'Message 1';
         @trigger_error($message, E_USER_WARNING);

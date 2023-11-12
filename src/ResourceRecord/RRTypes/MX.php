@@ -5,6 +5,8 @@ namespace ArrayAccess\DnsRecord\ResourceRecord\RRTypes;
 
 use ArrayAccess\DnsRecord\Abstracts\AbstractResourceRecordType;
 use ArrayAccess\DnsRecord\Utils\Buffer;
+use function is_array;
+use function unpack;
 
 /**
  * MX RDATA format - RFC1035 Section 3.3.9
@@ -29,19 +31,23 @@ class MX extends AbstractResourceRecordType
 {
     const TYPE = 'MX';
 
-    protected int $preference;
+    protected int $preference = -1;
 
-    protected string $exchange;
+    protected string $exchange = '';
 
     /**
      * @inheritdoc
      */
     protected function parseRData(string $message, int $rdataOffset): void
     {
-        ['preference' => $this->preference] = unpack(
+        $data = unpack(
             'npreference',
             Buffer::read($message, $rdataOffset, 2)
         );
+        if (!is_array($data)) {
+            return;
+        }
+        ['preference' => $this->preference] = $data;
         $this->exchange = Buffer::readLabel($message, $rdataOffset);
         $this->value = "$this->preference $this->exchange";
     }

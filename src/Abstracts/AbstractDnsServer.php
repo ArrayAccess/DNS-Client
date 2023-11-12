@@ -64,7 +64,7 @@ abstract class AbstractDnsServer implements DnsServerInterface
     public function getName(): string
     {
         // fallback default class name
-        return $this->name ??= ltrim(strrchr($this::class, '\\'))?:$this::class;
+        return $this->name ??= ltrim(strrchr($this::class, '\\')?:$this::class)?:$this::class;
     }
 
     /**
@@ -97,6 +97,15 @@ abstract class AbstractDnsServer implements DnsServerInterface
         $this->__unserialize(unserialize($data));
     }
 
+    /**
+     * @return array{
+     *     identity:string,
+     *     name: string,
+     *     primaryServer: string,
+     *     secondaryServer: ?string,
+     *     port: int,
+     * }
+     */
     public function __serialize(): array
     {
         return [
@@ -111,7 +120,13 @@ abstract class AbstractDnsServer implements DnsServerInterface
     /**
      * Magic method for unserialize
      *
-     * @param array $data
+     * @param array{
+     *      identity:string,
+     *      name: string,
+     *      primaryServer: string,
+     *      secondaryServer: ?string,
+     *      port: int,
+     *  } $data
      * @return void
      */
     public function __unserialize(array $data): void

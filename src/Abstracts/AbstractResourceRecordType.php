@@ -10,10 +10,9 @@ use ArrayAccess\DnsRecord\Interfaces\ResourceRecord\ResourceRecordClassInterface
 use ArrayAccess\DnsRecord\Interfaces\ResourceRecord\ResourceRecordMetaTypeInterface;
 use ArrayAccess\DnsRecord\Interfaces\ResourceRecord\ResourceRecordQTypeDefinitionInterface;
 use ArrayAccess\DnsRecord\Interfaces\ResourceRecord\ResourceRecordTypeInterface;
-use ArrayAccess\DnsRecord\ResourceRecord\Definitions\QType;
 use ArrayAccess\DnsRecord\Utils\Buffer;
 use ArrayAccess\DnsRecord\Utils\Lookup;
-use function is_string;
+use function is_array;
 use function ord;
 use function serialize;
 use function sprintf;
@@ -47,11 +46,11 @@ abstract class AbstractResourceRecordType implements ResourceRecordTypeInterface
     /**
      * Response type
      *
-     * @var string|ResourceRecordQTypeDefinitionInterface
+     * @var ResourceRecordQTypeDefinitionInterface
      * @see ResourceRecordTypeInterface::getType()
      * @see Lookup::RR_TYPES
      */
-    protected ResourceRecordQTypeDefinitionInterface|string $type;
+    protected ResourceRecordQTypeDefinitionInterface $type;
 
     /**
      * @var ResourceRecordClassInterface
@@ -112,10 +111,6 @@ abstract class AbstractResourceRecordType implements ResourceRecordTypeInterface
     protected function parseMessage(): void
     {
         $type = static::TYPE;
-        if (!isset($this->type) && is_string($type)) {
-            $this->type = $type;
-        }
-
         $message = $this->message->getMessage();
         $offsetPosition = $this->offsetPosition;
         $this->name   = Buffer::readLabel($message, $offsetPosition);
@@ -125,12 +120,17 @@ abstract class AbstractResourceRecordType implements ResourceRecordTypeInterface
                 'Response header length is invalid'
             );
         }
-        [
-            'type' => $type,
-            'class' => $class,
-            'ttl' => $this->ttl,
-            'length' => $this->rdLength,
-        ] = unpack("ntype/nclass/Nttl/nlength", $this->header);
+        $headerArray = unpack("ntype/nclass/Nttl/nlength", $this->header);
+        $this->rdLength = 0;
+        if (is_array($headerArray)) {
+            [
+                'type' => $type,
+                'class' => $class,
+                'ttl' => $this->ttl,
+                'length' => $this->rdLength,
+            ] = $headerArray;
+        }
+
         $this->rData = substr($message, $offsetPosition, $this->rdLength);
         if (strlen($this->rData) !== $this->rdLength) {
             throw new LengthException(
@@ -138,15 +138,14 @@ abstract class AbstractResourceRecordType implements ResourceRecordTypeInterface
             );
         }
 
-        $type  = Lookup::resourceType($type);
-        $class = Lookup::resourceClass($class);
-        if (isset($this->type)) {
-            $originType = $this->getType();
-            if ($originType->getName() !== $type->getName()) {
+        $type  = $type ? Lookup::resourceType($type) : null;
+        $class = Lookup::resourceClass($class??'');
+        if (isset($this->type) || !$type) {
+            if ($this->type->getName() !== $type?->getName()) {
                 throw new MalformedDataException(
                     sprintf(
                         'Response type does not match with current object type. object type: [%s] response type: [%s]',
-                        $originType,
+                        $this->type->getName(),
                         $type
                     )
                 );
@@ -165,6 +164,7 @@ abstract class AbstractResourceRecordType implements ResourceRecordTypeInterface
      * @param string $message
      * @param int $rdataOffset
      * @noinspection PhpMissingReturnTypeInspection
+     * @phpstan-ignore-next-line
      */
     protected function parseRData(string $message, int $rdataOffset)
     {
@@ -212,11 +212,6 @@ abstract class AbstractResourceRecordType implements ResourceRecordTypeInterface
      */
     public function getType(): ResourceRecordQTypeDefinitionInterface
     {
-        if (isset($this->type)) {
-            is_string($this->type) && $this->type = QType::create($this->type);
-            return $this->type;
-        }
-
         return $this->type;
     }
 
@@ -294,7 +289,7 @@ abstract class AbstractResourceRecordType implements ResourceRecordTypeInterface
     /**
      * Magic method for unserialize
      *
-     * @param array $data
+     * @param array{message: PacketMessageInterface, offsetPosition: int} $data
      * @return void
      * @throws MalformedDataException
      */

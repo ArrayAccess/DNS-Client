@@ -42,24 +42,24 @@ class Question implements PacketQuestionInterface
      * @see PacketQuestionInterface::getName()
      * @var string
      */
-    public readonly string $name;
+    private string $name;
 
     /**
      * @see PacketQuestionInterface::getMessage()
      * @var string
      */
-    public readonly string $message;
+    private string $message;
 
     /**
      * @see PacketQuestionInterface::getType()
      */
-    public readonly ?ResourceRecordQTypeDefinitionInterface $type;
+    private ?ResourceRecordQTypeDefinitionInterface $type;
 
     /**
      * @see PacketQuestionInterface::getClass()
      * @var ?ResourceRecordClassInterface
      */
-    public readonly ?ResourceRecordClassInterface $class;
+    private ?ResourceRecordClassInterface $class;
 
     /**
      * @inheritdoc
@@ -103,7 +103,9 @@ class Question implements PacketQuestionInterface
         }
 
         $name = strtolower($name);
-        if (($this->type??null) === 'PTR' && !preg_match('~\.(in-addr|ip6)\.arpa$~', $name)) {
+        if ($this->getType()?->getName() === 'PTR'
+            && !preg_match('~\.(in-addr|ip6)\.arpa$~', $name)
+        ) {
             $name = Addresses::reverseIp($name)??$name;
         }
         $this->name = $name;
@@ -178,14 +180,18 @@ class Question implements PacketQuestionInterface
     /**
      * Magic method for serializing
      *
-     * @return array{name:string, type:string, class:string}
+     * @return array{
+     *     name: string,
+     *     type: string,
+     *     class: string
+     * }
      */
     public function __serialize(): array
     {
         return [
             'name' => $this->name,
-            'type' => $this->type,
-            'class' => $this->class,
+            'type' => $this->getType()?->getName()??'',
+            'class' => $this->getClass()?->getName()??'',
         ];
     }
 
@@ -224,7 +230,11 @@ class Question implements PacketQuestionInterface
     /**
      * Magic method for unserialize
      *
-     * @param array $data
+     * @param array{
+     *      name: string,
+     *      type: string,
+     *      class: string
+     *  } $data
      * @return void
      */
     public function __unserialize(array $data): void

@@ -28,7 +28,7 @@ class RequestDataWrapper implements PacketRequestDataInterface
         return $this->packetRequestData->getHeader();
     }
 
-    public function withHeader(PacketHeaderInterface $header): static
+    public function withHeader(PacketHeaderInterface $header): RequestDataWrapper
     {
         return new self($this->packetRequestData->withHeader($header));
     }
@@ -123,7 +123,7 @@ class RequestDataWrapper implements PacketRequestDataInterface
     /**
      * Magic method unserialize
      *
-     * @param array $data
+     * @param array{packetRequestData: PacketRequestDataInterface} $data
      * @return void
      */
     public function __unserialize(array $data): void

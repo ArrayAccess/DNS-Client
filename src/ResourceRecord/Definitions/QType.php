@@ -17,6 +17,9 @@ final class QType implements ResourceRecordQTypeDefinitionInterface
 {
     use NamedValueTrait;
 
+    /**
+     * @var array<int, QType>
+     */
     private static array $cachedObject = [];
 
     private function __construct(string $name, int $value)
@@ -27,10 +30,10 @@ final class QType implements ResourceRecordQTypeDefinitionInterface
 
     /**
      * @param int|string $key
-     * @return self
+     * @return QType
      * @throws InvalidArgumentException
      */
-    public static function create(int|string $key) : self
+    public static function create(int|string $key) : QType
     {
         if (is_string($key)) {
             $key = strtoupper(trim($key));
@@ -66,6 +69,6 @@ final class QType implements ResourceRecordQTypeDefinitionInterface
                 )
             );
         }
-        return self::$cachedObject[$value] ??= new self($value, $key);
+        return self::$cachedObject[$key] ??= new self($value, $key);
     }
 }

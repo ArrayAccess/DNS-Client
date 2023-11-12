@@ -14,13 +14,14 @@ class Caller
      */
     public static function track(
         callable $callable,
-        &$errorCode = 0,
-        &$errorMessage = '',
-        &...$args
-    ) {
+        mixed &$errorCode = 0,
+        mixed &$errorMessage = '',
+        mixed &...$args
+    ) : mixed {
         set_error_handler(static function ($code, $message) use (&$errorCode, &$errorMessage) {
             $errorCode = $code;
             $errorMessage = $message;
+            return true;
         });
         try {
             return $callable(...$args);
@@ -39,9 +40,9 @@ class Caller
      */
     public static function call(
         callable $callable,
-        ...$args
-    ) {
-        set_error_handler(static fn () => null);
+        mixed ...$args
+    ) : mixed {
+        set_error_handler(static fn () => true);
         try {
             return $callable(...$args);
         } finally {

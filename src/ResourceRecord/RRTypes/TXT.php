@@ -14,7 +14,7 @@ use ArrayAccess\DnsRecord\Abstracts\AbstractResourceRecordType;
  *      /                   TXT-DATA                    /
  *      +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
  *
- * @use parent::parseRData() for logic
+ * @see AbstractResourceRecordType::parseRData() for logic
  * @link https://datatracker.ietf.org/doc/html/rfc1035#section-3.3.14
  */
 class TXT extends AbstractResourceRecordType

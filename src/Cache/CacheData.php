@@ -3,12 +3,9 @@ declare(strict_types=1);
 
 namespace ArrayAccess\DnsRecord\Cache;
 
-use ArrayAccess\DnsRecord\Exceptions\CacheException;
 use ArrayAccess\DnsRecord\Interfaces\Cache\CacheDataInterface;
 use DateInterval;
 use DateTimeInterface;
-use function is_array;
-use function is_string;
 use function serialize;
 use function unserialize;
 
@@ -121,23 +118,20 @@ class CacheData implements CacheDataInterface
 
     /**
      * @inheritdoc
-     * @throws CacheException
      */
     public function unserialize(string $data): void
     {
-        $data = unserialize($data);
-        if (!is_array($data) || !is_string($data['key']??null)) {
-            throw new CacheException(
-                'Invalid serialized data'
-            );
-        }
-        $this->__unserialize($data);
+        $this->__unserialize(unserialize($data));
     }
 
     /**
      * Magic method for unserialize
      *
-     * @param array $data
+     * @param array{
+     *     key: string,
+     *     data: mixed,
+     *     ttl: ?int
+     * } $data
      * @return void
      */
     public function __unserialize(array $data): void
@@ -150,7 +144,7 @@ class CacheData implements CacheDataInterface
     /**
      * Magic method for serializing
      *
-     * @return array{key: string, data: mixed, ttl:int}
+     * @return array{key: string, data: mixed, ttl: ?int}
      */
     public function __serialize(): array
     {

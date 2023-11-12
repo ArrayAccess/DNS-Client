@@ -121,6 +121,7 @@ interface ResourceRecordTypeInterface extends Serializable
 
     /**
      * Resource data
+     * @phpstan-ignore-next-line
      */
     public function getValue();
 
@@ -141,7 +142,7 @@ interface ResourceRecordTypeInterface extends Serializable
     /**
      * Return array data
      *
-     * @return array like dns_get_record()
+     * @return array<string, mixed> like dns_get_record()
      * @see \dns_get_record()
      */
     public function toArray() : array;

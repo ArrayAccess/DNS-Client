@@ -112,11 +112,17 @@ class Records implements PacketResourceRecordsInterface
         return count($this->records);
     }
 
+    /**
+     * @inheritdoc
+     */
     public function serialize() : string
     {
         return serialize($this->__serialize());
     }
 
+    /**
+     * @inheritdoc
+     */
     public function unserialize(string $data): void
     {
         $this->__unserialize(unserialize($data));
@@ -137,11 +143,14 @@ class Records implements PacketResourceRecordsInterface
     /**
      * Magic method for unserialize
      *
-     * @param array $data
+     * @param array{records: ResourceRecordTypeInterface[]} $data
      * @return void
      */
     public function __unserialize(array $data): void
     {
-        $this->records = $data['records'];
+        $this->records = [];
+        foreach ($data['records'] as $record) {
+            $this->add($record);
+        }
     }
 }

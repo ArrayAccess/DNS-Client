@@ -28,7 +28,7 @@ use function sprintf;
 class LookupTest extends TestCase
 {
 
-    public function testResourceClass()
+    public function testResourceClass() : void
     {
         $exception = null;
         try {
@@ -81,7 +81,7 @@ class LookupTest extends TestCase
         );
     }
 
-    public function testResourceOpcode()
+    public function testResourceOpcode() : void
     {
         $exception = null;
         try {
@@ -177,7 +177,7 @@ class LookupTest extends TestCase
         );
     }
 
-    public function testResourceType()
+    public function testResourceType() : void
     {
         $exception = null;
         try {
@@ -230,7 +230,7 @@ class LookupTest extends TestCase
         );
     }
 
-    public function testSocket()
+    public function testSocket() : void
     {
         /*
          * protocol:string, server:string, port:int, socket: resource

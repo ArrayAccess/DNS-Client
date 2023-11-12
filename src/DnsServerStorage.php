@@ -32,12 +32,12 @@ class DnsServerStorage implements DnsServerStorageInterface
     ];
 
     /**
-     * @var array<string, DnsServerInterface>
+     * @var DnsServerInterface[]
      */
     protected array $servers = [];
 
     /**
-     * @var array<class-string, DnsServerInterface>
+     * @var array<DnsServerInterface|class-string<DnsServerInterface>>
      */
     private static array $cachedDefaultServers = [];
 
@@ -79,13 +79,19 @@ class DnsServerStorage implements DnsServerStorageInterface
     {
         $obj = null;
         foreach (self::DEFAULT_SERVER as $className) {
-            if (!$obj) {
-                $obj = new static(self::getDefaultServer($className));
+            $server = self::getDefaultServer($className);
+            if (!$server) {
                 continue;
             }
-            $obj->add(self::getDefaultServer($className));
+            if (!$obj) {
+                $obj = new static($server);
+                continue;
+            }
+            $obj->add($server);
         }
-
+        /**
+         * @var static $obj
+         */
         return $obj;
     }
 
@@ -168,7 +174,7 @@ class DnsServerStorage implements DnsServerStorageInterface
     /**
      * Magic method unserialize
      *
-     * @param array $data
+     * @param array{servers: DnsServerInterface[]} $data
      * @return void
      */
     public function __unserialize(array $data): void

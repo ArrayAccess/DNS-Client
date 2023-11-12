@@ -203,7 +203,7 @@ class Header implements PacketHeaderInterface
      * Parse the message
      *
      * @param string $message
-     * @return $this
+     * @return static
      */
     private function parseMessage(string $message) : static
     {
@@ -251,7 +251,7 @@ class Header implements PacketHeaderInterface
     /**
      * @inheritdoc
      */
-    public static function fromMessage(PacketMessageInterface|string $message): static
+    public static function fromMessage(PacketMessageInterface|string $message): PacketHeaderInterface
     {
         if (!is_string($message)) {
             $message = $message->getMessage();
@@ -555,6 +555,7 @@ class Header implements PacketHeaderInterface
     /**
      * @inheritdoc
      * @return void
+     * @throws \Exception
      */
     public function unserialize(string $data): void
     {
@@ -575,8 +576,9 @@ class Header implements PacketHeaderInterface
     /**
      * Magic method for unserialize
      *
-     * @param array $data
+     * @param array{message: string} $data
      * @return void
+     * @throws \Exception
      * @uses base64_decode() decode to raw data
      */
     public function __unserialize(array $data): void

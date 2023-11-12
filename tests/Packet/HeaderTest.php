@@ -16,7 +16,7 @@ class HeaderTest extends TestCase
      *
      * @see \Tests\ArrayAccess\DnsRecord\Utils\BufferTest::testCreateQuestionMessage()
      */
-    public function testFromMessage()
+    public function testFromMessage() : void
     {
         try {
             Header::fromMessage('');

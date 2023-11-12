@@ -41,8 +41,9 @@ class CacheStorageTest extends TestCase
     {
         return new class implements PacketRequestDataInterface
         {
-            public function serialize()
+            public function serialize() : ?string
             {
+                return null;
             }
 
             public function unserialize(string $data)
@@ -100,11 +101,18 @@ class CacheStorageTest extends TestCase
                 return (new ReflectionClass(Request::class))->newInstanceWithoutConstructor();
             }
 
+            /**
+             * @return array{}
+             */
             public function __serialize(): array
             {
                 return [];
             }
 
+            /**
+             * @param array{} $data
+             * @return void
+             */
             public function __unserialize(array $data): void
             {
             }
@@ -124,7 +132,7 @@ class CacheStorageTest extends TestCase
         );
     }
 
-    public function testGetCacheName()
+    public function testGetCacheName() : void
     {
         $cacheName = $this->cacheStorage->getCacheName(
             $this->createFakePacketRequestData()
@@ -151,7 +159,7 @@ class CacheStorageTest extends TestCase
         );
     }
 
-    public function testGetAdapter()
+    public function testGetAdapter() : void
     {
         /**
          * @see self::testSetAdapter()
@@ -165,7 +173,7 @@ class CacheStorageTest extends TestCase
         );
     }
 
-    public function testSetAdapter()
+    public function testSetAdapter() : void
     {
         $cacheAdapter = new ArrayCacheAdapter();
         /**
@@ -173,7 +181,7 @@ class CacheStorageTest extends TestCase
          * @noinspection PhpVoidFunctionResultUsedInspection
          */
         $this->assertNull(
-            $this->cacheStorage->setAdapter($cacheAdapter),
+            $this->cacheStorage->setAdapter($cacheAdapter), // @phpstan-ignore-line
             sprintf(
                 '%1$s->setAdapter(%2$s) should no return',
                 $this->cacheStorageClassName,
@@ -192,7 +200,7 @@ class CacheStorageTest extends TestCase
         );
     }
 
-    public function testSaveItem()
+    public function testSaveItem() : void
     {
         $fakeResponse = $this->createFakeResponse();
         $this->assertFalse(
@@ -215,7 +223,7 @@ class CacheStorageTest extends TestCase
         );
     }
 
-    public function testGetItem()
+    public function testGetItem() : void
     {
         $key = 'nothing';
         $this->assertNull(
@@ -261,7 +269,7 @@ class CacheStorageTest extends TestCase
         );
     }
 
-    public function testDeleteItem()
+    public function testDeleteItem() : void
     {
         $key = 'nothing';
         $this->assertFalse(
@@ -287,7 +295,7 @@ class CacheStorageTest extends TestCase
         );
     }
 
-    public function testDeleteItems()
+    public function testDeleteItems() : void
     {
         $key = 'nothing';
         $this->assertFalse(
@@ -313,7 +321,7 @@ class CacheStorageTest extends TestCase
         );
     }
 
-    public function testHasItem()
+    public function testHasItem() : void
     {
         $fakeResponse = $this->createFakeResponse();
         $this->assertFalse(

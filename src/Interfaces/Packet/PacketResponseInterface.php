@@ -22,7 +22,7 @@ interface PacketResponseInterface extends Serializable
     /**
      * Get used protocol
      *
-     * @return string<"udp"|"tcp">
+     * @return string udp or tcp
      */
     public function getProtocol() : string;
 
@@ -64,7 +64,7 @@ interface PacketResponseInterface extends Serializable
     public function getStartTime() : float;
 
     /**
-     * Get end of query time
+     * Get the end of query time
      *
      * @return float
      */

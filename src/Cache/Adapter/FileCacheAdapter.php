@@ -29,6 +29,7 @@ use function is_array;
 use function is_dir;
 use function is_file;
 use function is_int;
+use function is_resource;
 use function is_string;
 use function md5;
 use function preg_match;
@@ -38,6 +39,7 @@ use function realpath;
 use function restore_error_handler;
 use function serialize;
 use function set_error_handler;
+use function sprintf;
 use function str_replace;
 use function strlen;
 use function substr;
@@ -139,9 +141,10 @@ class FileCacheAdapter implements CacheAdapterInterface
     {
         $namespace = trim($namespace);
         $namespace = preg_replace('~[^a-z0-9_\-.]~i', '', $namespace);
-        if ($namespace === '') {
+        if (!$namespace || !is_string($namespace)) {
             $namespace = '@';
         }
+
         if (!$directory
             || trim($directory) === ''
             || trim(trim($directory), '/\\') === ''
@@ -187,12 +190,17 @@ class FileCacheAdapter implements CacheAdapterInterface
             );
     }
 
+    /**
+     * @param string $directory
+     * @param bool $loopDir
+     * @return Generator<string, string>
+     */
     private function scanFiles(string $directory, bool $loopDir = false) : Generator
     {
         if (!is_dir($directory)) {
             return '';
         }
-        $directory = rtrim(realpath($directory)??$directory, '\\/');
+        $directory = rtrim(realpath($directory)?:$directory, '\\/');
         $chars = '+-ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
         $length = strlen($chars);
         for ($i = 0; $i < $length; ++$i) {
@@ -235,9 +243,12 @@ class FileCacheAdapter implements CacheAdapterInterface
             }
             $value = null;
             $valid = $this->validatePartialFile($file);
+            if (!$valid) {
+                $this->doUnlink($file);
+                continue;
+            }
             try {
-                if ($valid
-                    && is_array(($expiresAt = include $file))
+                if (is_array(($expiresAt = include $file))
                     && count($expiresAt) === 3
                     && is_int($expiresAt[0]??null)
                     && is_string($expiresAt[1]??null)
@@ -285,7 +296,7 @@ class FileCacheAdapter implements CacheAdapterInterface
         }
         if (count($this->files) > $maximum) {
             while (count($this->files) > $max) {
-                array_shift(self::$cachesExpires);
+                array_shift($this->files);
             }
         }
     }
@@ -359,7 +370,14 @@ class FileCacheAdapter implements CacheAdapterInterface
                 $tmp = $this->generateTempFile();
                 $h = fopen($tmp, 'x');
             }
-
+            if (!is_resource($h)) {
+                throw new Exception(
+                    sprintf(
+                        'Canot create resource from file : %s',
+                        $tmp
+                    )
+                );
+            }
             fwrite($h, $data);
             fclose($h);
             $unlink = true;
@@ -426,7 +444,7 @@ class FileCacheAdapter implements CacheAdapterInterface
         return $this->doIdDelete(...$arrayId);
     }
 
-    private function doUnlink(string $file)
+    private function doUnlink(string $file) : bool
     {
         if (self::isOpcacheSupport()) {
             Caller::call('opcache_invalidate', $file, true);
@@ -508,7 +526,7 @@ class FileCacheAdapter implements CacheAdapterInterface
             $unlink = true;
             return null;
         } finally {
-            if ($unlink && file_exists($file)) {
+            if ($unlink) {
                 self::$cachesExpires[$file] = 0;
                 unset($this->values[$key]);
                 $this->doUnlink($file);
@@ -559,7 +577,7 @@ class FileCacheAdapter implements CacheAdapterInterface
         if (isset($this->values[$key])) {
             return $this->values[$key];
         }
-        return $this->doFetch($key)??(new CacheData($key))->expiresAt(
+        return $this->doFetch($key)??(new CacheData($key))->expiresAfter(
             $this->defaultLifetime === 0
                 ? null
                 : $this->defaultLifetime

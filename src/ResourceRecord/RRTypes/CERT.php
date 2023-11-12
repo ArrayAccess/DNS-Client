@@ -4,9 +4,10 @@ declare(strict_types=1);
 namespace ArrayAccess\DnsRecord\ResourceRecord\RRTypes;
 
 use ArrayAccess\DnsRecord\Abstracts\AbstractResourceRecordType;
-use function array_values;
 use function base64_encode;
+use function is_array;
 use function substr;
+use function unpack;
 
 /**
  *
@@ -45,14 +46,18 @@ class CERT extends AbstractResourceRecordType
         if ($this->rdLength < 6) {
             return;
         }
+        $data = unpack('nformat/nkeyTag/Calgorithm', $this->rData);
+        if (!is_array($data)) {
+            return;
+        }
         //
         // unpack the format, keytag and algorithm
         //
         [
-            $this->format,
-            $this->keyTag,
-            $this->algorithm
-        ] = array_values(unpack('nformat/nkeytag/Calgorithm', $this->rData));
+            'format' => $this->format,
+            'keyTag' => $this->keyTag,
+            'algorithm' => $this->algorithm
+        ] = $data;
 
         //
         // copy the certificate

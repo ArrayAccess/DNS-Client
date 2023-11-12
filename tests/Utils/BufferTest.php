@@ -14,7 +14,7 @@ use function strlen;
 class BufferTest extends TestCase
 {
 
-    public function testRead()
+    public function testRead() : void
     {
         $printed = 'printed';
         $skipped = '_skipped';
@@ -66,7 +66,7 @@ class BufferTest extends TestCase
         );
     }
 
-    public function testCreateHeaderMessage()
+    public function testCreateHeaderMessage() : void
     {
         $header = Header::createQueryHeader();
         $this->assertSame(
@@ -79,7 +79,7 @@ class BufferTest extends TestCase
         );
     }
 
-    public function testCompressLabel()
+    public function testCompressLabel() : void
     {
         $domain = 'example.com';
         $label = Buffer::compressLabel($domain);
@@ -94,7 +94,7 @@ class BufferTest extends TestCase
         );
     }
 
-    public function testReadLabel()
+    public function testReadLabel() : void
     {
         $offset = 0;
         $domain = 'example.com';
@@ -171,7 +171,7 @@ class BufferTest extends TestCase
         );
     }
 
-    public function testCompressHeader()
+    public function testCompressHeader() : void
     {
         $header = Buffer::compressHeader(
             'A',
@@ -187,16 +187,19 @@ class BufferTest extends TestCase
         );
     }
 
-    public function testCreateQuestionMessage()
+    public function testCreateQuestionMessage() : void
     {
         $question = Question::fromFilteredResponse(
             'example.com',
             Lookup::RR_TYPES['A'],
             Lookup::QCLASS_IN
         );
+        /**
+         * @var non-empty-string $header
+         */
         $header = Buffer::compressHeader(
-            $question->getType(),
-            $question->getClass()
+            $question->getType(), // @phpstan-ignore-line
+            $question->getClass() // @phpstan-ignore-line
         );
         $message = Buffer::createQuestionMessage($question);
         // header is on the end of binary string

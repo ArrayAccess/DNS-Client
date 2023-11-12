@@ -5,7 +5,7 @@ namespace ArrayAccess\DnsRecord\Traits;
 
 trait DisableSetterTrait
 {
-    final public function __set(string $name, $value): void
+    final public function __set(string $name, mixed $value): void
     {
         // pass
     }

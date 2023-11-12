@@ -5,6 +5,7 @@ namespace ArrayAccess\DnsRecord\ResourceRecord\RRTypes;
 
 use ArrayAccess\DnsRecord\Abstracts\AbstractResourceRecordType;
 use ArrayAccess\DnsRecord\Utils\Buffer;
+use function is_array;
 use function unpack;
 
 /**
@@ -27,14 +28,17 @@ class SRV extends AbstractResourceRecordType
     protected function parseRData($message, int $rdataOffset): void
     {
         $offset = 0;
-        [
-            'priority' => $this->priority,
-            'weight' => $this->weight,
-            'port' => $this->port,
-        ] = unpack(
+        $data = unpack(
             'npriority/nweight/nport',
             Buffer::read($this->rData, $offset, 6)
         );
+        if (is_array($data)) {
+            [
+                'priority' => $this->priority,
+                'weight' => $this->weight,
+                'port' => $this->port,
+            ] = $data;
+        }
 
         $this->value = Buffer::readLabel($this->rData, $offset);
     }
@@ -54,6 +58,17 @@ class SRV extends AbstractResourceRecordType
         return $this->port;
     }
 
+    /**
+     * @return array{
+     *     host: string,
+     *     class: string,
+     *     type: string,
+     *     pri: int,
+     *     weight: int,
+     *     port: int,
+     *     target: ?string,
+     * }
+     */
     public function toArray(): array
     {
         return [

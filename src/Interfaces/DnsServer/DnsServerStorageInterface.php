@@ -29,6 +29,7 @@ interface DnsServerStorageInterface extends IteratorAggregate, Countable, Serial
      * Append dns server into collections
      *
      * @param DnsServerInterface $server
+     * @phpstan-ignore-next-line
      */
     public function add(DnsServerInterface $server);
 
@@ -36,6 +37,7 @@ interface DnsServerStorageInterface extends IteratorAggregate, Countable, Serial
      * Remove dns server
      *
      * @param DnsServerInterface|string $server
+     * @phpstan-ignore-next-line
      */
     public function remove(DnsServerInterface|string $server);
 
@@ -55,7 +57,7 @@ interface DnsServerStorageInterface extends IteratorAggregate, Countable, Serial
     public function getServers(): array;
 
     /**
-     * @return Traversable<DnsServerInterface>
+     * @return Traversable<string, DnsServerInterface>
      */
     public function getIterator() : Traversable;
 }

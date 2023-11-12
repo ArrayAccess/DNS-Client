@@ -28,7 +28,7 @@ use function sprintf;
  */
 class ResolverTest extends TestCase
 {
-    public function testSetDnsServerStorage()
+    public function testSetDnsServerStorage() : void
     {
         $resolver = new Resolver();
         $dnsServerStorage = $resolver->getDnsServerStorage();
@@ -43,7 +43,7 @@ class ResolverTest extends TestCase
         );
     }
 
-    public function testGetDnsServerStorage()
+    public function testGetDnsServerStorage() : void
     {
         $resolver = new Resolver();
         $dnsServerStorage = $resolver->getDnsServerStorage();
@@ -67,7 +67,7 @@ class ResolverTest extends TestCase
         );
     }
 
-    public function testSetCache()
+    public function testSetCache() : void
     {
         $resolver = new Resolver();
         $cache = $resolver->getCache();
@@ -82,7 +82,7 @@ class ResolverTest extends TestCase
         );
     }
 
-    public function testGetCache()
+    public function testGetCache() : void
     {
         $resolver = new Resolver();
         $cache = $resolver->getCache();
@@ -123,7 +123,7 @@ class ResolverTest extends TestCase
         );
     }
 
-    public function testQuery()
+    public function testQuery() : void
     {
         $resolver = new Resolver();
         $query = $resolver->query('example.com');
@@ -160,7 +160,7 @@ class ResolverTest extends TestCase
         );
     }
 
-    public function testIQuery()
+    public function testIQuery() : void
     {
         $resolver = new Resolver();
         $query = $resolver->iQuery('example.com');
@@ -184,7 +184,7 @@ class ResolverTest extends TestCase
         );
     }
 
-    public function testLookup()
+    public function testLookup() : void
     {
         $resolver = new Resolver(
             DnsServerStorage::createDefault(),
@@ -223,7 +223,7 @@ class ResolverTest extends TestCase
         );
     }
 
-    public function testLookups()
+    public function testLookups() : void
     {
         $resolver = new Resolver();
         $lookups = $resolver->lookups(
@@ -268,12 +268,12 @@ class ResolverTest extends TestCase
             );
             $this->assertSame(
                 'example.com',
-                $lookups['A']->getAnswers()->getQuestion()->getName(),
+                $lookups['A']->getAnswers()->getQuestion()?->getName(),
                 'Question name lookup should example.com'
             );
             $this->assertSame(
                 IN::NAME,
-                $lookups['A']->getAnswers()->getQuestion()->getClass()->getName(),
+                $lookups['A']->getAnswers()->getQuestion()->getClass()?->getName(),
                 sprintf(
                     'Question class name lookup should %s',
                     IN::NAME
@@ -326,12 +326,12 @@ class ResolverTest extends TestCase
             );
             $this->assertSame(
                 'example.com',
-                $lookups['B']->getAnswers()->getQuestion()->getName(),
+                $lookups['B']->getAnswers()->getQuestion()?->getName(),
                 'Question name lookup should example.com'
             );
             $this->assertSame(
                 IN::NAME,
-                $lookups['B']->getAnswers()->getQuestion()->getClass()->getName(),
+                $lookups['B']->getAnswers()->getQuestion()->getClass()?->getName(),
                 sprintf(
                     'Question class name lookup should %s',
                     IN::NAME
@@ -348,5 +348,46 @@ class ResolverTest extends TestCase
                 )
             );
         }
+    }
+
+    public function testSetGetFlag() : void
+    {
+        $resolver = new Resolver();
+        $this->assertFalse(
+            $resolver->isCdFlag(),
+            'CDFlag default set to false'
+        );
+        $this->assertTrue(
+            $resolver->isAdFlag(),
+            'ADFlag default set to true'
+        );
+        $this->assertFalse(
+            $resolver->isDnsSec(),
+            'DNSSec default set to false'
+        );
+        $this->assertTrue(
+            $resolver->isRecurse(),
+            'Recurse default set to true'
+        );
+        $resolver->setCdFlag(true);
+        $this->assertTrue(
+            $resolver->isCdFlag(),
+            'CDFlag after set true'
+        );
+        $resolver->setAdFlag(false);
+        $this->assertFalse(
+            $resolver->isAdFlag(),
+            'CDFlag after set false'
+        );
+        $resolver->setDnsSec(true);
+        $this->assertTrue(
+            $resolver->isDnsSec(),
+            'DNSSec set false'
+        );
+        $resolver->setRecurse(false);
+        $this->assertFalse(
+            $resolver->isRecurse(),
+            'Recurse set false'
+        );
     }
 }

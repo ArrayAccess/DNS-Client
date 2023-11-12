@@ -25,6 +25,8 @@ jobs:
         run: php vendor/bin/phpcs --standard=phpcs.xml
       - name: "Run PHP Unit Test"
         run: php vendor/bin/phpunit --configuration=phpunit.xml
+      - name: "Run Phpstan"
+        run: php vendor/bin/phpstan --configuration=phpstan.neon --memory-limit=256M
   continuous-integration-php82:
     name: "Continuous Integration php8.2"
     runs-on: ubuntu-latest
@@ -45,6 +47,8 @@ jobs:
         run: php vendor/bin/phpcs --standard=phpcs.xml
       - name: "Run PHP Unit Test"
         run: php vendor/bin/phpunit --configuration=phpunit.xml
+      - name: "Run Phpstan"
+        run: php vendor/bin/phpstan --configuration=phpstan.neon --memory-limit=256M
   coding-standards-php83:
     name: "Continuous Integration php8.3"
     runs-on: ubuntu-latest
@@ -65,3 +69,5 @@ jobs:
         run: php vendor/bin/phpcs --standard=phpcs.xml
       - name: "Run PHP Unit Test"
         run: php vendor/bin/phpunit --configuration=phpunit.xml
+      - name: "Run Phpstan"
+        run: php vendor/bin/phpstan --configuration=phpstan.neon --memory-limit=256M

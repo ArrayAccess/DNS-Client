@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace ArrayAccess\DnsRecord\Utils;
 
 use ArrayAccess\DnsRecord\Exceptions\EmptyArgumentException;
+use ArrayAccess\DnsRecord\Interfaces\Packet\PacketHeaderInterface;
 use ArrayAccess\DnsRecord\Interfaces\Packet\PacketQuestionInterface;
 use ArrayAccess\DnsRecord\Interfaces\ResourceRecord\ResourceRecordClassInterface;
 use ArrayAccess\DnsRecord\Interfaces\ResourceRecord\ResourceRecordQTypeDefinitionInterface;
 use ArrayAccess\DnsRecord\Interfaces\ResourceRecord\ResourceRecordTypeInterface;
-use ArrayAccess\DnsRecord\Packet\Header;
 use ArrayAccess\DnsRecord\ResourceRecord\RRTypes\OPT;
 use function chr;
 use function explode;
@@ -88,11 +88,11 @@ class Buffer
      *
      * @see Header
      * @link https://datatracker.ietf.org/doc/html/rfc5395#section-2
-     * @param Header $header
+     * @param PacketHeaderInterface $header
      *
      * @return string
      */
-    public static function createHeaderMessage(Header $header) : string
+    public static function createHeaderMessage(PacketHeaderInterface $header) : string
     {
         $message  = pack('n', $header->getId());
         $message .= chr(
@@ -130,7 +130,7 @@ class Buffer
     public static function createQuestionMessage(PacketQuestionInterface $rr): string
     {
         $message  = self::compressLabel($rr->getName());
-        $message .= self::compressHeader($rr->getType(), $rr->getClass());
+        $message .= self::compressHeader($rr->getType()??'', $rr->getClass()??'');
         return $message;
     }
 
@@ -174,7 +174,7 @@ class Buffer
             );
         }
 
-        $name = preg_replace('~\\\+.~', '.', $name);
+        $name = (string) preg_replace('~\\\+.~', '.', $name);
         $computedName = '';
         foreach (explode('.', $name) as $label) {
             if ($label === '') {

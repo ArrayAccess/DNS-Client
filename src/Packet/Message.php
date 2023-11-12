@@ -64,7 +64,7 @@ final class Message implements PacketMessageInterface
     /**
      * Magic method for unserialize
      *
-     * @param array $data
+     * @param array{message: string} $data
      * @return void
      * @uses base64_decode() decode to raw data
      */

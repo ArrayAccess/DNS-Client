@@ -60,7 +60,7 @@ class Psr6CacheAdapter implements Psr6CacheAdapterInterface
         $item
             ->set($cacheData)
             ->expiresAfter($cacheData->getExpiresAfter());
-        return $this->getCacheItemPool()->save($item);
+        return $this->getCacheItemPool()?->save($item)??false;
     }
 
     /**
@@ -95,7 +95,7 @@ class Psr6CacheAdapter implements Psr6CacheAdapterInterface
     public function getItem(string $key): CacheDataInterface
     {
         $cacheItem = $this->getCacheItem($key);
-        $cacheItem = $cacheItem->get();
+        $cacheItem = $cacheItem?->get();
         if ($cacheItem instanceof CacheDataInterface) {
             return $cacheItem;
         }

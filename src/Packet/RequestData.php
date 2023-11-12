@@ -16,6 +16,9 @@ use function unserialize;
 class RequestData implements PacketRequestDataInterface
 {
 
+    /**
+     * @var PacketQuestionInterface[]
+     */
     protected array $questions;
 
     protected PacketResourceRecordsInterface $additionalRecords;
@@ -73,7 +76,7 @@ class RequestData implements PacketRequestDataInterface
      */
     public function getQuestion(): PacketQuestionInterface
     {
-        return reset($this->questions);
+        return $this->getQuestions()[0];
     }
 
     /**
@@ -193,7 +196,12 @@ class RequestData implements PacketRequestDataInterface
     /**
      * Magic method for serializing
      *
-     * @return array
+     * @return array{
+     *      questions: PacketQuestionInterface[],
+     *      additionalRecords: PacketResourceRecordsInterface,
+     *      authorityRecords: PacketResourceRecordsInterface,
+     *      answerRecords: PacketResourceRecordsInterface
+     * }
      */
     public function __serialize(): array
     {
@@ -208,7 +216,12 @@ class RequestData implements PacketRequestDataInterface
     /**
      * Magic method for unserialize
      *
-     * @param array $data
+     * @param array{
+     *       questions: PacketQuestionInterface[],
+     *       additionalRecords: PacketResourceRecordsInterface,
+     *       authorityRecords: PacketResourceRecordsInterface,
+     *       answerRecords: PacketResourceRecordsInterface
+     *  } $data
      * @return void
      */
     public function __unserialize(array $data): void

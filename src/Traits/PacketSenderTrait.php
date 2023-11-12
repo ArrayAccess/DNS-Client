@@ -34,6 +34,9 @@ use function usleep;
 
 trait PacketSenderTrait
 {
+    /**
+     * @var array<string, resource>
+     */
     private array $sockets = [];
 
     abstract public function getCache(): ?CacheStorageInterface;
@@ -69,6 +72,7 @@ trait PacketSenderTrait
 
     /**
      * @throws RequestException
+     * @return resource
      */
     final protected function createSocketServer(
         bool $useUDP,
@@ -111,7 +115,7 @@ trait PacketSenderTrait
      * @param bool $useUDP
      * @param string|null $server
      * @param int $port
-     * @param $serverList
+     * @param mixed $serverList
      * @return array{
      *       protocol: string,
      *       server: string,
@@ -125,7 +129,7 @@ trait PacketSenderTrait
         bool $useUDP,
         ?string $server = null,
         int $port = 53,
-        &$serverList = null
+        mixed &$serverList = null
     ) : array {
         if ($server) {
             $protocol = $useUDP ? "udp" : "tcp";
@@ -151,7 +155,7 @@ trait PacketSenderTrait
                     sprintf(
                         'Can not connect to server "%s" last error : %s',
                         $server,
-                        ($e->getMessage()??null)?:'Unknown Error'
+                        ($e->getMessage()?:null)?:'Unknown Error'
                     ),
                     $e->getCode()
                 );
@@ -192,13 +196,14 @@ trait PacketSenderTrait
         set_error_handler(static function ($errCode, $errMsg) use (&$eCode, &$eMessage) {
             $eCode = $errCode;
             $eMessage = $errMsg;
+            return true;
         });
         try {
             $status = fwrite($resource, $query);
             $info = stream_get_meta_data($resource);
             // $isUdp = $info['stream_type'] === 'udp_socket';
             if ($status === false) {
-                $isTimeout = $info && !empty($info['timed_out']);
+                $isTimeout = !empty($info['timed_out']);
                 $eMessage = $eMessage ?: (
                 $isTimeout ? 'Write process timed out' : 'Unknown error while writing data'
                 );
@@ -226,7 +231,7 @@ trait PacketSenderTrait
             }
 
             if ($data === false) {
-                $isTimeout = $info && !empty($info['timed_out']);
+                $isTimeout = !empty($info['timed_out']);
                 $eMessage = $eMessage ?: (
                 $isTimeout ? 'Read process timed out' : 'Unknown error while reading data'
                 );
@@ -328,8 +333,11 @@ trait PacketSenderTrait
 
     private function saveResponseCache(PacketResponseInterface $response): void
     {
+        $cache = $this->getCache();
+        if (!$cache) {  // @phpstan-ignore-line
+            return;
+        }
         try {
-            $cache = $this->getCache();
             $cacheTime = null;
             foreach ($response->getAnswers()->getRecords() as $type) {
                 if (!$this->cacheAbleResource($type->getClass()->getName())) {
@@ -353,18 +361,18 @@ trait PacketSenderTrait
     private function getCachePacket(PacketRequestDataInterface $packetRequestData): ?PacketResponseInterface
     {
         $cache = $this->getCache();
-        if (!$cache) {
+        if (!$cache) { // @phpstan-ignore-line
             return null;
         }
         try {
-            if (($response = $this->getCache()->getItem($packetRequestData)) instanceof PacketResponseInterface) {
+            if (($response = $cache->getItem($packetRequestData)) instanceof PacketResponseInterface) {
                 $currentTime = time();
                 $endTime = ($response->getEndTime() / 1000) + CacheStorageInterface::MAXIMUM_TTL;
                 $shouldExpired = $endTime < $currentTime;
                 if (!$shouldExpired) {
                     return $response;
                 }
-                $this->getCache()->deleteItem(
+                $cache->deleteItem(
                     $response->getPacketData()
                 );
             }
@@ -373,12 +381,12 @@ trait PacketSenderTrait
         return null;
     }
 
-    /**
+    /*
      * @param string $protocol
      * @param string $server
      * @param string $port
      * @return void
-     */
+     * unused
     private function closeSocket(
         string $protocol,
         string $server,
@@ -391,8 +399,12 @@ trait PacketSenderTrait
             fclose($this->sockets["$protocol://$server:$port"]);
         }
         unset($this->sockets["$protocol://$server:$port"]);
-    }
+    }*/
 
+    /**
+     * @param resource $resource
+     * @return bool
+     */
     private function closeSocketResource(&$resource): bool
     {
         if (!is_resource($resource)) {
@@ -400,12 +412,11 @@ trait PacketSenderTrait
         }
         try {
             $meta = stream_get_meta_data($resource);
-            $uri = $meta['uri'] ?? null;
+            $uri = !empty($meta['uri']) ? $meta['uri'] : null;
+            fclose($resource);
             if (!$uri) {
-                fclose($resource);
                 return true;
             }
-            fclose($resource);
             if (isset($this->sockets[$uri])) {
                 unset($this->sockets[$uri]);
             }

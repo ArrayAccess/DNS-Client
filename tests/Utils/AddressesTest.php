@@ -13,7 +13,7 @@ use function sprintf;
 class AddressesTest extends TestCase
 {
 
-    public function testFilterDomain()
+    public function testFilterDomain() : void
     {
         $baseDomain = 'example.com'; // base domain
         $httpsDomainWithPort = "https://$baseDomain:443/";
@@ -99,7 +99,7 @@ class AddressesTest extends TestCase
         );
     }
 
-    public function testFilterIp()
+    public function testFilterIp() : void
     {
         $invalidIP = '127.0.0.';
         $validLocalIP = '127.0.0.1';
@@ -156,7 +156,7 @@ class AddressesTest extends TestCase
         );
     }
 
-    public function testFilterIpv4()
+    public function testFilterIpv4() : void
     {
         $invalidIP = '::1';
         $validLocalIP = '127.0.0.1';
@@ -177,7 +177,7 @@ class AddressesTest extends TestCase
         );
     }
 
-    public function testFilterIpv6()
+    public function testFilterIpv6() : void
     {
         $invalidIP = '127.0.0.1';
         $validLocalIP = '::1';
@@ -198,7 +198,7 @@ class AddressesTest extends TestCase
         );
     }
 
-    public function testReverseIp()
+    public function testReverseIp() : void
     {
         $invalidIP = '127.0.0.';
         $invalidIPv6 = '::1:::';
@@ -246,7 +246,7 @@ class AddressesTest extends TestCase
         );
     }
 
-    public function testGuessDNSServer()
+    public function testGuessDNSServer() : void
     {
         $invalidIP = '127.0.0.';
         $validIP = '127.0.0.1';

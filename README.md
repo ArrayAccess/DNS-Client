@@ -35,13 +35,13 @@ $resolver = new Resolver($dnsServer, $cache);
  */
 $useCache = true; // default to true
 $timeout = 3.5; // 3.5 seconds
-$response = $resolver->lookup('domainname.ext', 'A', 'IN', $timeout, $useCache);
+$response = $resolver->lookup('domain-name.ext', 'A', 'IN', $timeout, $useCache);
 
 /**
  * Enable Pseudo OPT 
  */
 $resolver->setDnsSec(true);
-$response = $resolver->lookup('domainname.ext', 'A', 'IN');
+$response = $resolver->lookup('domain-name.ext', 'A', 'IN');
 $answers = $response->getAnswers();
 $records = $answers->getRecords();
 // Filter "A" Address Only
@@ -49,7 +49,7 @@ $arrayA = $records->getFilteredType('A');
 
 ```
 
-> IXFR & AXFR not yet implemented
+> IXFR & AXFR aren't fully implemented yet
 
 
 ## Note

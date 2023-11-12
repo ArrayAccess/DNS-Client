@@ -90,6 +90,9 @@ class Lookup
         'DSO'    => self::OPCODE_DSO,
     ];
 
+    /**
+     * @var class-string<ResourceRecordOpcodeInterface>[]|ResourceRecordOpcodeInterface[]
+     */
     private static array $opcodeCache = [
         self::OPCODE_QUERY  => Query::class,
         self::OPCODE_IQUERY => IQuery::class,

@@ -37,9 +37,9 @@ interface PacketHeaderInterface extends Serializable
      * Create a new Header object from given raw data
      *
      * @param PacketMessageInterface|string $message the raw message from dns response
-     * @return static
+     * @return PacketHeaderInterface
      */
-    public static function fromMessage(PacketMessageInterface|string $message): static;
+    public static function fromMessage(PacketMessageInterface|string $message): PacketHeaderInterface;
 
     /**
      * Crate query header for request dns server
@@ -81,7 +81,7 @@ interface PacketHeaderInterface extends Serializable
      * A one-bit field that specifies whether this message is a
      *  query (0), or a response (1)
      *
-     * @return int<0|1>
+     * @return int Lookup::QR_RESPONSE|Lookup::QR_QUERY
      */
     public function getQR(): int;
 

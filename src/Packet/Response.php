@@ -81,6 +81,18 @@ class Response implements PacketResponseInterface
         $this->__unserialize(unserialize($data));
     }
 
+    /**
+     * @return array{
+     *     startTime: float,
+     *     endTime: float,
+     *     protocol: string,
+     *     server: string,
+     *     port: int,
+     *     packetData: PacketRequestDataInterface,
+     *     answers: PacketAnswersInterface,
+     *     time: int
+     * }
+     */
     public function __serialize(): array
     {
         return [
@@ -98,7 +110,16 @@ class Response implements PacketResponseInterface
     /**
      * Magic method for unserialize
      *
-     * @param array $data
+     * @param array{
+     *      startTime: float,
+     *      endTime: float,
+     *      protocol: string,
+     *      server: string,
+     *      port: int,
+     *      packetData: PacketRequestDataInterface,
+     *      answers: PacketAnswersInterface,
+     *      time: int
+     *  } $data
      * @return void
      */
     public function __unserialize(array $data): void

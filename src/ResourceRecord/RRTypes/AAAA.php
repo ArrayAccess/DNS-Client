@@ -44,7 +44,7 @@ class AAAA extends AbstractResourceRecordType
      *     class: string,
      *     ttl: int,
      *     type: string,
-     *     ip: string
+     *     ipv6: string
      * }
      */
     public function toArray(): array

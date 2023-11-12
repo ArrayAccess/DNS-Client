@@ -14,12 +14,12 @@ interface PacketQuestionInterface extends Serializable
      * Question constructor
      *
      * @param string $name QNAME / Name
-     * @param string|Int|ResourceRecordTypeInterface $type QTYPE / Type
+     * @param string|Int|ResourceRecordTypeInterface|ResourceRecordQTypeDefinitionInterface $type QTYPE / Type
      * @param string|int|ResourceRecordClassInterface $class QCLASS / Class
      */
     public function __construct(
         string $name,
-        string|Int|ResourceRecordTypeInterface $type,
+        string|Int|ResourceRecordTypeInterface|ResourceRecordQTypeDefinitionInterface $type,
         string|int|ResourceRecordClassInterface $class
     );
 

@@ -8,7 +8,7 @@ use ArrayAccess\DnsRecord\Utils\Buffer;
 
 /**
  * MG RDATA format (EXPERIMENTAL) - RFC1035 Section 3.3.6
- * MGMNAME A <domain-name> which specifies a mailbox which is a
+ * MGMNAME A <domain-name> which specifies a mailbox, which is a
  *  member of the mail group specified by the domain name
  *
  *      +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+

@@ -6,6 +6,7 @@ namespace ArrayAccess\DnsRecord\ResourceRecord\RRTypes;
 use ArrayAccess\DnsRecord\Abstracts\AbstractResourceRecordType;
 use ArrayAccess\DnsRecord\Utils\Buffer;
 use function base64_encode;
+use function is_array;
 use function strlen;
 use function unpack;
 
@@ -37,18 +38,21 @@ class RRSIG extends AbstractResourceRecordType
     protected function parseRData(string $message, int $rdataOffset): void
     {
         $stuff = Buffer::read($message, $rdataOffset, 18);
-        [
-            'type' => $this->sigType,
-            'algorithm' => $this->algorithm,
-            'labels' => $this->labels,
-            'originalttl' => $this->originalttl,
-            'expiration' => $this->expiration,
-            'inception' => $this->inception,
-            'keytag' => $this->keyTag,
-        ] = unpack(
+        $stuff = unpack(
             "ntype/calgorithm/clabels/Noriginalttl/Nexpiration/Ninception/nkeytag",
             $stuff
         );
+        if (is_array($stuff)) {
+            [
+                'type' => $this->sigType,
+                'algorithm' => $this->algorithm,
+                'labels' => $this->labels,
+                'originalttl' => $this->originalttl,
+                'expiration' => $this->expiration,
+                'inception' => $this->inception,
+                'keytag' => $this->keyTag,
+            ] = $stuff;
+        }
         $this->signer = Buffer::readLabel($message, $rdataOffset);
         $this->signature = base64_encode(
             Buffer::read($message, $rdataOffset, $this->rdLength - (strlen($this->signer) + 2) - 18)

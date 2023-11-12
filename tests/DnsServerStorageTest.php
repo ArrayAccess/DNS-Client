@@ -23,6 +23,9 @@ class DnsServerStorageTest extends TestCase
 {
     protected DnsServerStorage $dnsServerStorage;
 
+    /**
+     * @var class-string<DnsServerStorage>
+     */
     protected string $dnsClassName;
 
     /**
@@ -36,7 +39,7 @@ class DnsServerStorageTest extends TestCase
         $this->dnsClassName = $this->dnsServerStorage::class;
     }
 
-    public function testObject()
+    public function testObject() : void
     {
         $google = new Google();
         $this->assertContains(
@@ -77,7 +80,7 @@ class DnsServerStorageTest extends TestCase
         );
     }
 
-    public function testGetServers()
+    public function testGetServers() : void
     {
         $this->assertNotEmpty(
             $this->dnsServerStorage->getServers(),
@@ -88,7 +91,7 @@ class DnsServerStorageTest extends TestCase
         );
     }
 
-    public function testCount()
+    public function testCount() : void
     {
         $this->assertCount(
             count($this->dnsServerStorage->getServers()),
@@ -100,7 +103,7 @@ class DnsServerStorageTest extends TestCase
         );
     }
 
-    public function testGetIterator()
+    public function testGetIterator() : void
     {
         $this->assertInstanceOf(
             ArrayIterator::class,
@@ -132,7 +135,7 @@ class DnsServerStorageTest extends TestCase
         }
     }
 
-    public function testRemove()
+    public function testRemove() : void
     {
         $servers = $this->dnsServerStorage->getServers();
         $total = count($servers);
@@ -141,7 +144,7 @@ class DnsServerStorageTest extends TestCase
          * @noinspection PhpVoidFunctionResultUsedInspection
          */
         $this->assertNull(
-            $this->dnsServerStorage->remove(reset($servers)),
+            $this->dnsServerStorage->remove(reset($servers)), // @phpstan-ignore-line
             sprintf(
                 '%s->remove() should no return',
                 $this->dnsClassName
@@ -155,14 +158,25 @@ class DnsServerStorageTest extends TestCase
                 $this->dnsClassName
             )
         );
+        $this->assertSame(
+            count($this->dnsServerStorage),
+            $this->dnsServerStorage->count(),
+            sprintf(
+                'count(%1$s) should identical with %1$s->count()',
+                $this->dnsClassName
+            )
+        );
     }
 
-    public function testGet()
+    public function testGet() : void
     {
         $this->assertNull(
             $this->dnsServerStorage->get('not_exist_server'),
             'Dns server identity "not_exist_server" should not exist'
         );
+        /**
+         * @var Google $google
+         */
         $google = $this->dnsServerStorage::getDefaultServer(Google::class);
         $this->assertSame(
             $this->dnsServerStorage->get($google->getIdentity()),
@@ -185,7 +199,7 @@ class DnsServerStorageTest extends TestCase
             )
         );
         $this->assertSame(
-            $this->dnsServerStorage->get($google)->getIdentity(),
+            $this->dnsServerStorage->get($google)?->getIdentity(),
             $google::class,
             sprintf(
                 'Method %1$s->get(%2$s)->getIdentity() should equal with id %3$s',
@@ -196,7 +210,7 @@ class DnsServerStorageTest extends TestCase
         );
     }
 
-    public function testAdd()
+    public function testAdd() : void
     {
         $total = count($this->dnsServerStorage);
 
@@ -206,7 +220,7 @@ class DnsServerStorageTest extends TestCase
          * @noinspection PhpVoidFunctionResultUsedInspection
          */
         $this->assertNull(
-            $this->dnsServerStorage->add($custom),
+            $this->dnsServerStorage->add($custom), // @phpstan-ignore-line
             sprintf(
                 '%1$s->add(%2$s) should no return',
                 $this->dnsClassName,
@@ -258,7 +272,7 @@ class DnsServerStorageTest extends TestCase
         );
     }
 
-    public function testGetDefaultServer()
+    public function testGetDefaultServer() : void
     {
         $this->assertInstanceOf(
             Google::class,
@@ -281,7 +295,7 @@ class DnsServerStorageTest extends TestCase
         );
     }
 
-    public function testCreateDefault()
+    public function testCreateDefault() : void
     {
         $this->assertInstanceOf(
             $this->dnsClassName,
@@ -313,7 +327,7 @@ class DnsServerStorageTest extends TestCase
         );
     }
 
-    public function testSerialize()
+    public function testSerialize() : void
     {
         try {
             // just reduce error
@@ -346,9 +360,26 @@ class DnsServerStorageTest extends TestCase
                 $this->dnsClassName
             )
         );
+        /** @noinspection PhpUnhandledExceptionInspection */
+        $this->assertIsString(
+            $this->dnsServerStorage->serialize(),
+            sprintf(
+                '%1$s->serialize() should string',
+                $this->dnsClassName
+            )
+        );
+        /** @noinspection PhpUnhandledExceptionInspection */
+        $this->assertArrayHasKey(
+            'servers',
+            unserialize($this->dnsServerStorage->serialize()),
+            sprintf(
+                'unserialize(%1$s->serialize()) should array has key "servers"',
+                $this->dnsClassName
+            )
+        );
     }
 
-    public function testUnserialize()
+    public function testUnserialize() : void
     {
         try {
             $object = unserialize(serialize($this->dnsServerStorage));
@@ -360,6 +391,17 @@ class DnsServerStorageTest extends TestCase
             $object,
             sprintf(
                 'unserialize(serialize(%1$s)) should instanceof %1$s',
+                $this->dnsClassName
+            )
+        );
+        /** @noinspection PhpVoidFunctionResultUsedInspection */
+        /** @noinspection PhpUnhandledExceptionInspection */
+        $this->assertNull(
+            $this->dnsServerStorage->unserialize(  // @phpstan-ignore-line
+                $this->dnsServerStorage->serialize()
+            ),
+            sprintf(
+                '%1$s->unserialize(%1$s->serialize()) should no return',
                 $this->dnsClassName
             )
         );

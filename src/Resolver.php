@@ -40,9 +40,9 @@ class Resolver
     protected bool $dnsSec = false;
 
     /**
-     * if we should set the recursion desired bit to 1 or 0.
+     * The recursion desired bit to 1 or 0.
      *
-     * by default, this is set to true, the DNS server to perform a recursive
+     * By default, this is set to true, the DNS server to perform a recursive
      * request. If set to false, the RD bit will be set to 0, and the server will
      * not perform recursion on the request.
      */
@@ -96,10 +96,7 @@ class Resolver
 
     public function getCache(): CacheStorageInterface
     {
-        if (!isset($this->cache)) {
-            $this->setCache(new CacheStorage());
-        }
-        return $this->cache;
+        return $this->cache ??= new CacheStorage();
     }
 
     public function setCache(CacheStorageInterface $cache): void
@@ -109,10 +106,7 @@ class Resolver
 
     public function getDnsServerStorage(): DnsServerStorage
     {
-        if (!isset($this->dnsServerStorage)) {
-            $this->setDnsServerStorage(DnsServerStorage::createDefault());
-        }
-        return $this->dnsServerStorage;
+        return $this->dnsServerStorage ??= DnsServerStorage::createDefault();
     }
 
     public function setDnsServerStorage(DnsServerStorage $dnsServerStorage): void
@@ -176,7 +170,7 @@ class Resolver
         if ($isOpt || $dnsSec) {
             $requestData
                 ->getAdditionalRecords()
-                ->add(OPT::create($question->getType()->getValue()));
+                ->add(OPT::create($question->getType()?->getValue()??0));
         }
         return $requestData;
     }
@@ -201,6 +195,8 @@ class Resolver
             $class,
             $this->isAdFlag(),
             $this->isCdFlag(),
+            $this->isDnsSec(),
+            $this->isRecurse(),
             ...$server
         );
     }
@@ -225,6 +221,8 @@ class Resolver
             $class,
             $this->isAdFlag(),
             $this->isCdFlag(),
+            $this->isDnsSec(),
+            $this->isRecurse(),
             ...$server
         );
     }
@@ -269,7 +267,7 @@ class Resolver
         $udp = null;
         $cached = [];
         foreach ($requests as $key => $request) {
-            $name = $request->getQuestion()->getClass()->getName();
+            $name = $request->getQuestion()->getClass()?->getName()??IN::NAME;
             if (isset($cached[$name])) {
                 $requests[$key] = $cached[$name];
                 continue;
@@ -291,6 +289,10 @@ class Resolver
                     ] = $this->createSocket($dns, false);
                 }
 
+                /**
+                 * @var resource $socket
+                 * @var string $server
+                 */
                 $socket = $isUdp ? $udp : $tcp;
                 $server = $isUdp ? $udpServer : $tcpServer;
                 $port = $isUdp ? $udpPort : $tcpPort;
@@ -326,8 +328,8 @@ class Resolver
                     $startTime,
                     $this->createMicrotime(),
                     $protocol,
-                    $server,
-                    $port,
+                    (string) $server,
+                    (int) $port,
                     $request,
                     new Answers($message)
                 );
@@ -343,6 +345,9 @@ class Resolver
         $this->closeSocketResource($tcp);
         $this->closeSocketResource($udp);
 
+        /**
+         * @var array<Throwable|PacketResponseInterface> $requests
+         */
         return $requests;
     }
 
