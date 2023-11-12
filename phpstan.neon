@@ -1,0 +1,13 @@
+parameters:
+  level: 8
+  checkGenericClassInNonGenericObjectType: false
+  paths:
+    - src
+    - tests
+  fileExtensions:
+    - php
+#  ignoreErrors:
+#    -
+#      message: '#^Method.+::[^\(]+\(\) has no return type#'
+#      paths:
+#        - src/Interfaces/*
