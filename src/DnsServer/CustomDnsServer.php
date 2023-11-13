@@ -9,6 +9,10 @@ use function sprintf;
 
 /**
  * User defined dns server
+ * Example GreatBit -> 114DNS
+ *
+ * Primary DNS: 114.114.114.114
+ * Secondary DNS: 114.114.115.115
  */
 final class CustomDnsServer extends AbstractDnsServer
 {
