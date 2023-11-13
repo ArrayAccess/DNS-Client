@@ -14,6 +14,7 @@ use function base64_decode;
 use function base64_encode;
 use function is_string;
 use function ord;
+use function rand;
 use function serialize;
 use function sprintf;
 use function strlen;
@@ -150,12 +151,13 @@ class Header implements PacketHeaderInterface
     protected int $arcount;
 
 
-    /**
+    /*
      * Maximum 16-bit integer = 65535
      *
      * @var int
-     */
+     *
     private static int $increment = 0;
+    */
 
     /**
      * Header constructor
@@ -279,11 +281,13 @@ class Header implements PacketHeaderInterface
         bool $rdFlag = true
     ) : PacketHeaderInterface {
         if ($id === null) {
+            $id = rand(1, 65535);
             // 160-bit max 65535 -> then reset to 1
-            if (++self::$increment > 65535) {
+            /*if (++self::$increment > 65535) {
                 self::$increment = 1;
             }
             $id = self::$increment;
+            */
         }
 
         $id = $id % 65535;
