@@ -4,6 +4,8 @@ declare(strict_types=1);
 namespace ArrayAccess\DnsRecord\ResourceRecord\RRTypes;
 
 use ArrayAccess\DnsRecord\Abstracts\AbstractResourceRecordType;
+use ArrayAccess\DnsRecord\Interfaces\ResourceRecord\ResourceRecordQTypeDefinitionInterface;
+use ArrayAccess\DnsRecord\ResourceRecord\Definitions\QType;
 use ArrayAccess\DnsRecord\Utils\Buffer;
 use function base64_encode;
 use function is_array;
@@ -14,7 +16,7 @@ class RRSIG extends AbstractResourceRecordType
 {
     const TYPE = 'RRSIG';
 
-    protected int $sigType;
+    protected ResourceRecordQTypeDefinitionInterface $sigType;
 
     protected int $algorithm;
 
@@ -22,9 +24,9 @@ class RRSIG extends AbstractResourceRecordType
 
     protected int $originalttl;
 
-    protected int $expiration;
+    protected string $expiration;
 
-    protected int $inception;
+    protected string $inception;
 
     protected int $keyTag;
 
@@ -44,14 +46,17 @@ class RRSIG extends AbstractResourceRecordType
         );
         if (is_array($stuff)) {
             [
-                'type' => $this->sigType,
+                'type' => $sigType,
                 'algorithm' => $this->algorithm,
                 'labels' => $this->labels,
                 'originalttl' => $this->originalttl,
-                'expiration' => $this->expiration,
-                'inception' => $this->inception,
+                'expiration' => $expiration,
+                'inception' => $inception,
                 'keytag' => $this->keyTag,
             ] = $stuff;
+            $this->sigType = QType::create($sigType);
+            $this->inception = date('YmdHis', $inception);
+            $this->expiration = date('YmdHis', $expiration);
         }
         $this->signer = Buffer::readLabel($message, $rdataOffset);
         $this->signature = base64_encode(
@@ -59,7 +64,7 @@ class RRSIG extends AbstractResourceRecordType
         );
     }
 
-    public function getSigType(): int
+    public function getSigType(): ResourceRecordQTypeDefinitionInterface
     {
         return $this->sigType;
     }
@@ -79,12 +84,12 @@ class RRSIG extends AbstractResourceRecordType
         return $this->originalttl;
     }
 
-    public function getExpiration(): int
+    public function getExpiration(): string
     {
         return $this->expiration;
     }
 
-    public function getInception(): int
+    public function getInception(): string
     {
         return $this->inception;
     }
@@ -103,6 +108,7 @@ class RRSIG extends AbstractResourceRecordType
     {
         return $this->signature;
     }
+
     public function toArray(): array
     {
         return [
@@ -111,8 +117,8 @@ class RRSIG extends AbstractResourceRecordType
             'class' => $this->getClass()->getName(),
             'type' => $this->getType()->getName(),
             'labels' => $this->getLabels(),
-            'sigtype' => $this->getSigType(),
-            'originalttl' => $this->getOriginalttl(),
+            'sigtype' => $this->getSigType()->getName(),
+            'original-ttl' => $this->getOriginalttl(),
             'expiration' => $this->getExpiration(),
             'inception' => $this->getInception(),
             'keytag' => $this->getKeyTag(),
