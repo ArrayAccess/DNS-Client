@@ -43,20 +43,8 @@ class DNSKEY extends AbstractResourceRecordType
     /**
      * Algorithm
      *
-     * |Value |Algorithm [Mnemonic]  | Signing | References| Status  |
-     * |------|----------------------|---------|-----------|---------|
-     * |0     | reserved             |                               |
-     * |1     | RSA/MD5 [RSAMD5]     |     n   | [RFC2537] |  NOT RECOMMENDED |
-     * |2     | Diffie-Hellman [DH]  |     n   | [RFC2539] |   -     |
-     * |3     | DSA/SHA-1 [DSA]      |     y   | [RFC2536] |  OPTIONAL|
-     * |4     | Elliptic Curve [ECC] |         |   TBA     |   -       |
-     * |5     | RSA/SHA-1 [RSASHA1]  |     y   | [RFC3110] |  MANDATORY|
-     * |252   | Indirect [INDIRECT]  |     n   |           |   -       |
-     * |253   | Private [PRIVATEDNS] |     y   |     -     |  OPTIONAL |
-     * |254   | Private [PRIVATEOID] |     y   |     -     |  OPTIONAL |
-     * |255   | reserved             |                                 |
-     *
      * @var int $algorithm
+     * @link https://www.iana.org/assignments/dns-sec-alg-numbers/dns-sec-alg-numbers.xhtml#table-dns-sec-alg-numbers-1
      */
     protected int $algorithm;
 
@@ -118,5 +106,56 @@ class DNSKEY extends AbstractResourceRecordType
         $this->zoneKey = ((int)$flags[7]) === 1;
         $this->zoneSep = ((int)$flags[15]) === 1;
     }
+
+    public function getProtocol(): int
+    {
+        return $this->protocol;
+    }
+
+    public function getAlgorithm(): int
+    {
+        return $this->algorithm;
+    }
+
+    public function getFlags(): int
+    {
+        return $this->flags;
+    }
+
+    public function getPublicKey(): string
+    {
+        return $this->publicKey;
+    }
+
+    public function getKeyTag(): int
+    {
+        return $this->keyTag;
+    }
+
+    public function isZoneKey(): bool
+    {
+        return $this->zoneKey;
+    }
+
+    public function isZoneSep(): bool
+    {
+        return $this->zoneSep;
+    }
+
+    public function toArray(): array
+    {
+        return [
+            'host' => $this->getName(),
+            'class' => $this->getClass()->getName(),
+            'ttl' => $this->getTTL(),
+            'type' => $this->getType()->getName(),
+            'flags' => $this->getFlags(),
+            'protocol' => $this->getProtocol(),
+            'algorithm' => $this->getAlgorithm(),
+            'keytag' => $this->getKeyTag(),
+            'zonekey' => $this->isZoneKey(),
+            'zonesep' => $this->isZoneSep(),
+            'pubkey' => $this->getPublicKey(),
+        ];
+    }
 }
-// @todo add toArray()
